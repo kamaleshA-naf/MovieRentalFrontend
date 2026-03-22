@@ -1,0 +1,66 @@
+<div class="rating-container"
+  (mouseleave)="closeOptions()">
+
+  <!-- Main rate button -->
+  <button class="rate-btn"
+    [class.rated]="isRated()"
+    [style.color]="isRated() ? currentOption()!.color : ''"
+    [disabled]="isSubmitting()"
+    (click)="clickCurrent()"
+    [title]="isRated()
+      ? 'Click to change or remove rating'
+      : 'Rate this'">
+
+    @if (isSubmitting()) {
+      <div class="rate-spinner"></div>
+    } @else if (isRated()) {
+      <span class="rate-emoji">{{ currentOption()!.emoji }}</span>
+    } @else {
+      <!-- Thumbs up icon when not rated -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+      </svg>
+    }
+
+    <span class="rate-label">
+      @if (isRated()) {
+        {{ currentOption()!.label }}
+      } @else {
+        Rate
+      }
+    </span>
+  </button>
+
+  <!-- Tooltip -->
+  @if (tooltip() && isRated()) {
+    <div class="rating-tooltip">{{ tooltip() }}</div>
+  }
+
+  <!-- Options popup -->
+  @if (showOptions()) {
+    <div class="rating-popup">
+
+      <div class="popup-arrow"></div>
+
+      @for (opt of options; track opt.value) {
+        <button class="rating-opt"
+          [class.active]="currentRating() === opt.value"
+          [style.--opt-color]="opt.color"
+          (click)="rate(opt.value)"
+          [title]="currentRating() === opt.value
+            ? 'Click to remove this rating'
+            : opt.label">
+
+          <span class="opt-emoji">{{ opt.emoji }}</span>
+          <span class="opt-label">{{ opt.label }}</span>
+
+          @if (currentRating() === opt.value) {
+            <span class="opt-check">✓</span>
+          }
+        </button>
+      }
+
+    </div>
+  }
+
+</div>

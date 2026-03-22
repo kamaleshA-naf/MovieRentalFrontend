@@ -1,0 +1,216 @@
+<div class="page">
+  <app-navbar />
+
+  @if (isLoading()) {
+    <div class="loading-screen">
+      <div class="loading-spinner"></div>
+      <p>Loading...</p>
+    </div>
+  }
+
+  @if (notFound() && !isLoading()) {
+    <div class="not-found"><p>Movie not found. Redirecting...</p></div>
+  }
+
+  @if (!isLoading() && !notFound() && movie()) {
+
+    <div class="hero-section">
+      <div class="hero-backdrop">
+        @if (movie()!.thumbnailUrl) {
+          <img [src]="movie()!.thumbnailUrl!" class="hero-bg-img" alt="" />
+        }
+      </div>
+      <div class="hero-overlay"></div>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-inner">
+
+        <!-- LEFT COLUMN -->
+        <div class="poster-col">
+          <div class="poster-wrap">
+            <img [src]="poster(movie()!.thumbnailUrl)"
+              [alt]="movie()!.title" class="poster-img"
+              (error)="$any($event.target).src = PLACEHOLDER" />
+            @if (hasAccess()) {
+              <div class="poster-badge owned">✓ Owned · {{ daysLeft() }}d left</div>
+            }
+            @if (isExpired() && !hasAccess()) {
+              <div class="poster-badge expired">Expired</div>
+            }
+          </div>
+
+          <!-- WISHLIST BUTTON — clean single heart -->
+          <button class="side-btn wishlist-btn"
+            [class.wishlisted]="isInWishlist()"
+            [disabled]="isTogglingWish()"
+            (click)="toggleWishlist()">
+            @if (isTogglingWish()) {
+              <span class="btn-spin"></span>
+            } @else if (isInWishlist()) {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              In Wishlist
+            } @else {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/>
+              </svg>
+              Add to Wishlist
+            }
+          </button>
+
+          <!-- ✅ ADD TO CART — always visible, state changes -->
+          @if (hasAccess()) {
+            <!-- Already rented — show disabled state -->
+            <button class="side-btn cart-btn rented" disabled>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              Already Rented
+            </button>
+          } @else if (isInCart()) {
+            <!-- In cart — navigate to cart -->
+            <button class="side-btn cart-btn in-cart"
+              (click)="router.navigate(['/cart'])">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              In Cart · View Cart
+            </button>
+          } @else {
+            <!-- Add to cart -->
+            <button class="side-btn cart-btn"
+              [disabled]="isAddingCart()"
+              (click)="addToCart()">
+              @if (isAddingCart()) {
+                <span class="btn-spin"></span>
+                Adding...
+              } @else {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                </svg>
+                Add to Cart
+              }
+            </button>
+          }
+
+          <!-- RATING -->
+          <div class="rating-box">
+            <p class="rating-lbl">RATE THIS MOVIE</p>
+            <app-movie-rating
+              [movieId]="movie()!.id"
+              [current]="userRating()"
+              (rated)="onRated($event)">
+            </app-movie-rating>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="details-col">
+          <div class="genre-tags">
+            @for (g of movie()!.genres; track g.id) {
+              <span class="genre-tag">{{ g.name }}</span>
+            }
+          </div>
+
+          <h1 class="movie-title">{{ movie()!.title }}</h1>
+
+          <div class="meta-row">
+            <span class="meta-item">📅 {{ movie()!.releaseYear }}</span>
+            <span class="meta-dot">·</span>
+            <span class="meta-item">{{ movie()!.director }}</span>
+          </div>
+
+          <p class="description">{{ movie()!.description }}</p>
+
+          <div class="price-card">
+            <div>
+              <p class="price-lbl">RENTAL PRICE</p>
+              <p class="price-val">₹{{ movie()!.rentalPrice }}<span>/day</span></p>
+            </div>
+            @if (!hasAccess()) {
+              <p class="price-note">Choose duration at checkout</p>
+            }
+          </div>
+
+          <div class="cta-row">
+            @if (hasAccess()) {
+              <button class="btn-primary" (click)="watchNow()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                Watch Now
+              </button>
+              <span class="access-badge">✓ {{ daysLeft() }} days remaining</span>
+            } @else if (isExpired()) {
+              <span class="expired-notice">Rental expired</span>
+              <button class="btn-primary" (click)="openRentModal()">Rent Again</button>
+            } @else {
+              <button class="btn-primary" (click)="openRentModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                </svg>
+                Rent Now
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Rent Modal -->
+    @if (showRentModal()) {
+      <div class="modal-backdrop" (click)="closeRentModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Rent "{{ movie()!.title }}"</h3>
+            <button class="modal-close" (click)="closeRentModal()">✕</button>
+          </div>
+          <p class="modal-sub">₹{{ movie()!.rentalPrice }}/day · Select duration</p>
+          <div class="duration-options">
+            @for (days of durations; track days) {
+              <button class="dur-btn"
+                [class.active]="selectedDuration() === days"
+                (click)="selectedDuration.set(days)">
+                <span class="dur-num">{{ days }}</span>
+                <span class="dur-unit">{{ days === 1 ? 'day' : 'days' }}</span>
+                <span class="dur-price">₹{{ movie()!.rentalPrice * days }}</span>
+              </button>
+            }
+          </div>
+          <div class="cost-total">
+            <span>Total</span>
+            <strong>₹{{ totalCost() }}</strong>
+          </div>
+          <button class="confirm-btn" [disabled]="isRenting()" (click)="confirmRent()">
+            @if (isRenting()) {
+              <span class="btn-spin white"></span> Processing...
+            } @else {
+              Confirm &amp; Pay ₹{{ totalCost() }}
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Payment Success -->
+    @if (showPaySuccess()) {
+      <div class="modal-backdrop">
+        <div class="pay-modal">
+          <div class="success-icon">✓</div>
+          <h2>Payment Successful!</h2>
+          <p>You can now watch <strong>{{ movie()!.title }}</strong></p>
+          <div class="pay-row"><span>Amount Paid</span><strong>₹{{ paidAmount() }}</strong></div>
+          <div class="pay-row"><span>Duration</span><strong>{{ selectedDuration() }} days</strong></div>
+          <div class="success-actions">
+            <button class="btn-primary" (click)="watchNow()">▶ Watch Now</button>
+            <button class="btn-secondary" (click)="closePaySuccess()">Later</button>
+          </div>
+        </div>
+      </div>
+    }
+
+  }
+</div>

@@ -1,0 +1,230 @@
+<div class="page">
+  <app-navbar />
+
+  <div class="content">
+
+    <!-- Profile header -->
+    <div class="profile-header">
+      <div class="avatar-wrap">
+        <div class="avatar">
+          {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
+        </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="greeting">
+          {{ auth.currentUser()?.userName }}
+        </h1>
+        <p class="profile-email">
+          {{ auth.currentUser()?.role }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-box">
+        <p class="stat-num">{{ rentalService.myRentals().length }}</p>
+        <p class="stat-lbl">Total Rentals</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-num">{{ activeRentals().length }}</p>
+        <p class="stat-lbl">Active Now</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-num">{{ wishlistService.wishlist().length }}</p>
+        <p class="stat-lbl">Wishlist</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab"
+        [class.active]="activeTab() === 'overview'"
+        (click)="activeTab.set('overview')">
+        Overview
+      </button>
+      <button class="tab"
+        [class.active]="activeTab() === 'rentals'"
+        (click)="activeTab.set('rentals')">
+        Rentals
+      </button>
+      <button class="tab"
+        [class.active]="activeTab() === 'wishlist'"
+        (click)="activeTab.set('wishlist')">
+        Wishlist
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+      </div>
+    }
+
+    @if (!isLoading()) {
+
+      <!-- OVERVIEW -->
+      @if (activeTab() === 'overview') {
+
+        @if (activeRentals().length > 0) {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>Currently Watching</h3>
+              <span class="count-tag">{{ activeRentals().length }}</span>
+            </div>
+            @for (rental of activeRentals(); track rental.id) {
+              <div class="rental-row">
+                <div class="rental-info">
+                  <p class="rental-movie">{{ rental.movieTitle }}</p>
+                  <p class="rental-meta">
+                    Expires {{ formatDate(rental.expiryDate) }}
+                  </p>
+                  <div class="days-row">
+                    <div class="days-track">
+                      <div class="days-fill"
+                        [style.width]="(daysRemaining(rental.expiryDate) / 30 * 100) + '%'">
+                      </div>
+                    </div>
+                    <span class="days-txt">
+                      {{ daysRemaining(rental.expiryDate) }}d left
+                    </span>
+                  </div>
+                </div>
+                <button class="watch-btn"
+                  (click)="watchMovie(rental.movieId)">
+                  <svg width="14" height="14" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  Watch
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>Currently Watching</h3>
+            </div>
+            <div class="empty-mini">
+              No active rentals. Browse movies to get started.
+            </div>
+          </div>
+        }
+
+        @if (wishlistService.wishlist().length > 0) {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>My Wishlist</h3>
+              <button class="link-btn"
+                (click)="activeTab.set('wishlist')">
+                View all
+              </button>
+            </div>
+            @for (item of wishlistService.wishlist().slice(0,3);
+              track item.id) {
+              <div class="wishlist-row">
+                <div class="wl-info">
+                  <p class="wl-title">{{ item.movieTitle }}</p>
+                  <p class="wl-meta">
+                    ₹{{ item.rentalPrice }}/day ·
+                    Added {{ formatDate(item.addedDate) }}
+                  </p>
+                </div>
+                <button class="rent-btn"
+                  (click)="viewMovie(item.movieId)">
+                  Rent
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- RENTALS -->
+      @if (activeTab() === 'rentals') {
+        <div class="section-card">
+          <div class="sc-head">
+            <h3>All Rentals</h3>
+            <span class="count-tag">
+              {{ rentalService.myRentals().length }}
+            </span>
+          </div>
+          @if (rentalService.myRentals().length === 0) {
+            <div class="empty-mini">
+              No rentals yet.
+            </div>
+          }
+          @for (rental of rentalService.myRentals(); track rental.id) {
+            <div class="rental-row">
+              <div class="rental-info">
+                <p class="rental-movie">{{ rental.movieTitle }}</p>
+                <p class="rental-meta">
+                  Rented {{ formatDate(rental.rentalDate) }} ·
+                  Expires {{ formatDate(rental.expiryDate) }}
+                </p>
+                @if (rental.status === 'Active') {
+                  <div class="days-row">
+                    <div class="days-track">
+                      <div class="days-fill"
+                        [style.width]="(daysRemaining(rental.expiryDate) / 30 * 100) + '%'">
+                      </div>
+                    </div>
+                    <span class="days-txt">
+                      {{ daysRemaining(rental.expiryDate) }}d left
+                    </span>
+                  </div>
+                }
+              </div>
+              <div class="rental-right">
+                <span class="status-pill"
+                  [class]="statusClass(rental.status)">
+                  {{ rental.status }}
+                </span>
+                @if (rental.status === 'Active') {
+                  <button class="watch-btn sm"
+                    (click)="watchMovie(rental.movieId)">
+                    Watch
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- WISHLIST -->
+      @if (activeTab() === 'wishlist') {
+        <div class="section-card">
+          <div class="sc-head">
+            <h3>Wishlist</h3>
+            <span class="count-tag">
+              {{ wishlistService.wishlist().length }}
+            </span>
+          </div>
+          @if (wishlistService.wishlist().length === 0) {
+            <div class="empty-mini">
+              No movies in wishlist.
+            </div>
+          }
+          @for (item of wishlistService.wishlist(); track item.id) {
+            <div class="wishlist-row">
+              <div class="wl-info">
+                <p class="wl-title">{{ item.movieTitle }}</p>
+                <p class="wl-meta">
+                  ₹{{ item.rentalPrice }}/day ·
+                  Added {{ formatDate(item.addedDate) }}
+                </p>
+              </div>
+              <button class="rent-btn"
+                (click)="viewMovie(item.movieId)">
+                View
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </div>
+</div>

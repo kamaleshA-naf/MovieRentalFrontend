@@ -1,0 +1,136 @@
+<div class="page">
+  <app-navbar />
+
+  <div class="content">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Wishlist</h1>
+        <p class="page-sub">
+          {{ wishlistService.wishlist().length }} movies saved
+        </p>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+      </div>
+    }
+
+    @if (!isLoading()) {
+
+      @if (wishlistService.wishlist().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24"
+              fill="currentColor" opacity="0.15">
+              <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/>
+            </svg>
+          </div>
+          <p class="empty-title">Your wishlist is empty</p>
+          <p class="empty-sub">
+            Browse movies and add them to your wishlist
+          </p>
+          <button class="browse-btn"
+            (click)="router.navigate(['/home'])">
+            Browse Movies
+          </button>
+        </div>
+      } @else {
+
+        <div class="wishlist-layout">
+
+          <!-- Movie list -->
+          <div class="movie-list">
+            @for (item of wishlistService.wishlist(); track item.id) {
+              <div class="movie-card">
+                <div class="movie-poster"
+                  (click)="viewMovie(item.movieId)">
+                  <img [src]="posterUrl(item.thumbnailUrl ?? null)"
+                    [alt]="item.movieTitle"
+                    (error)="$any($event.target).src = PLACEHOLDER" />
+                </div>
+                <div class="movie-info">
+                  <h3 class="movie-title"
+                    (click)="viewMovie(item.movieId)">
+                    {{ item.movieTitle }}
+                  </h3>
+                  <p class="movie-price">
+                    ₹{{ item.rentalPrice }}
+                    <span>/day</span>
+                  </p>
+                  <p class="added-date">
+                    Added {{ formatDate(item.addedDate) }}
+                  </p>
+                </div>
+                <div class="movie-actions">
+                  <button class="rent-btn"
+                    (click)="viewMovie(item.movieId)">
+                    <svg width="14" height="14"
+                      viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Rent
+                  </button>
+                  <button class="remove-btn"
+                    [disabled]="removingId() === item.id"
+                    (click)="remove(item)">
+                    @if (removingId() === item.id) {
+                      <span class="btn-spinner"></span>
+                    } @else {
+                      <svg width="16" height="16"
+                        viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Summary card -->
+          <div class="summary-card">
+            <h3 class="summary-title">Wishlist Summary</h3>
+
+            <div class="summary-items">
+              @for (item of wishlistService.wishlist(); track item.id) {
+                <div class="summary-row">
+                  <span class="summary-movie">
+                    {{ item.movieTitle }}
+                  </span>
+                  <span class="summary-price">
+                    ₹{{ item.rentalPrice }}/day
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-total">
+              <span>Total per day</span>
+              <span class="total-amount">₹{{ totalCost() }}</span>
+            </div>
+
+            <p class="summary-note">
+              Rent movies individually on their detail pages.
+              Prices are per day.
+            </p>
+
+            <button class="rent-all-btn" (click)="rentAll()">
+              <svg width="16" height="16" viewBox="0 0 24 24"
+                fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              Start Watching
+            </button>
+          </div>
+
+        </div>
+      }
+
+    }
+  </div>
+</div>

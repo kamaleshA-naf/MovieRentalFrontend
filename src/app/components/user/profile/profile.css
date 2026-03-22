@@ -1,0 +1,317 @@
+.page { min-height: 100vh; background: #000; }
+
+.content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+/* Profile header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.avatar-wrap { flex-shrink: 0; }
+
+.avatar {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #0a84ff, #0055b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(10,132,255,0.35);
+}
+
+.greeting {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #f5f5f7;
+  letter-spacing: -0.3px;
+}
+
+.profile-email {
+  color: rgba(245,245,247,0.4);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.2rem;
+}
+
+/* Stats */
+.stats-strip {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  flex: 1;
+  min-width: 100px;
+  background: rgba(28,28,30,0.8);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  text-align: center;
+  transition: all 0.2s;
+}
+.stat-box:hover { border-color: var(--color-border-2); }
+
+.stat-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #f5f5f7;
+  letter-spacing: -0.3px;
+}
+
+.stat-lbl {
+  font-size: 0.72rem;
+  color: rgba(245,245,247,0.35);
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--color-border);
+  color: rgba(245,245,247,0.5);
+  border-radius: 8px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab:hover { background: rgba(255,255,255,0.1); color: #f5f5f7; }
+.tab.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Loading */
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+.loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Section card */
+.section-card {
+  background: rgba(28,28,30,0.7);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.sc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.sc-head h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f5f5f7;
+}
+
+.count-tag {
+  background: rgba(10,132,255,0.12);
+  border: 1px solid rgba(10,132,255,0.2);
+  color: #0a84ff;
+  border-radius: 8px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-btn:hover { opacity: 0.75; }
+
+.empty-mini {
+  padding: 1.5rem;
+  text-align: center;
+  color: rgba(245,245,247,0.25);
+  font-size: 0.85rem;
+}
+
+/* Rental row */
+.rental-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 1rem;
+}
+.rental-row:last-child { border-bottom: none; }
+
+.rental-info { flex: 1; min-width: 0; }
+.rental-movie {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f5f5f7;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rental-meta {
+  font-size: 0.75rem;
+  color: rgba(245,245,247,0.4);
+  margin-bottom: 0.5rem;
+}
+
+.days-row { display: flex; align-items: center; gap: 0.65rem; }
+.days-track {
+  flex: 1;
+  max-width: 140px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.days-fill {
+  height: 100%;
+  background: var(--color-success);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.days-txt {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+.rental-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Status pills */
+.status-pill {
+  display: inline-flex;
+  border-radius: 5px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.status-active {
+  background: rgba(48,209,88,0.12);
+  border: 1px solid rgba(48,209,88,0.25);
+  color: #30d158;
+}
+.status-expired {
+  background: rgba(255,159,10,0.12);
+  border: 1px solid rgba(255,159,10,0.25);
+  color: #ff9f0a;
+}
+.status-returned {
+  background: rgba(245,245,247,0.08);
+  border: 1px solid rgba(245,245,247,0.1);
+  color: rgba(245,245,247,0.4);
+}
+
+/* Buttons */
+.watch-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.watch-btn:hover { background: #1a8fff; }
+.watch-btn.sm { padding: 0.4rem 0.75rem; }
+
+.rent-btn {
+  background: rgba(10,132,255,0.1);
+  border: 1px solid rgba(10,132,255,0.25);
+  color: #0a84ff;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.rent-btn:hover { background: rgba(10,132,255,0.2); }
+
+/* Wishlist row */
+.wishlist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 1rem;
+}
+.wishlist-row:last-child { border-bottom: none; }
+
+.wl-info { flex: 1; min-width: 0; }
+.wl-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #f5f5f7;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wl-meta { font-size: 0.75rem; color: rgba(245,245,247,0.35); }
+
+@media (max-width: 600px) {
+  .stats-strip { gap: 0.5rem; }
+  .stat-box { min-width: 80px; padding: 0.75rem 0.6rem; }
+  .stat-num { font-size: 1.2rem; }
+}

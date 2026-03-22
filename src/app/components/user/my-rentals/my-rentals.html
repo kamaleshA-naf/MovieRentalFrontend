@@ -1,0 +1,171 @@
+<div class="page">
+  <app-navbar />
+
+  <div class="rentals-content">
+
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">My Rentals</h2>
+        <p class="page-sub">
+          {{ activeCount() }} active ·
+          {{ rentalService.myRentals().length }} total
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+      <button class="tab"
+        [class.active]="activeFilter() === 'all'"
+        (click)="activeFilter.set('all')">
+        All
+        <span class="tab-count">
+          {{ rentalService.myRentals().length }}
+        </span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Active'"
+        (click)="activeFilter.set('Active')">
+        Active
+        <span class="tab-count active-count">
+          {{ activeCount() }}
+        </span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Expired'"
+        (click)="activeFilter.set('Expired')">
+        Expired
+        <span class="tab-count">{{ expiredCount() }}</span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Returned'"
+        (click)="activeFilter.set('Returned')">
+        Returned
+        <span class="tab-count">{{ returnedCount() }}</span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    @if (rentalService.isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        Loading your rentals...
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!rentalService.isLoading() && filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <h3>No rentals found</h3>
+        <p>
+          @if (activeFilter() === 'all') {
+            You have not rented any movies yet.
+          } @else {
+            No {{ activeFilter().toLowerCase() }} rentals.
+          }
+        </p>
+        <button class="browse-btn"
+          (click)="router.navigate(['/home'])">
+          Browse Movies
+        </button>
+      </div>
+    }
+
+    <!-- Rental cards -->
+    @if (!rentalService.isLoading() && filtered().length > 0) {
+      <div class="rentals-grid">
+        @for (rental of filtered(); track rental.id) {
+          <div class="rental-card"
+            [class.card-active]="rental.status === 'Active'"
+            [class.card-expired]="rental.status === 'Expired'"
+            [class.card-returned]="rental.status === 'Returned'">
+
+            <div class="card-top">
+              <div class="movie-info">
+                <h4 class="movie-title">{{ rental.movieTitle }}</h4>
+                <span class="status-pill"
+                  [class]="statusClass(rental.status)">
+                  {{ rental.status }}
+                </span>
+              </div>
+              @if (rental.status === 'Active') {
+                <div class="days-info">
+                  <span class="days-num">
+                    {{ daysLeft(rental.expiryDate) }}
+                  </span>
+                  <span class="days-label">days left</span>
+                </div>
+              }
+            </div>
+
+            <!-- Progress bar -->
+            @if (rental.status === 'Active') {
+              <div class="progress-wrap">
+                <div class="progress-bar">
+                  <div class="progress-fill"
+                    [style.width.%]="progressWidth(rental)">
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Dates -->
+            <div class="date-row">
+              <div class="date-item">
+                <span class="date-label">Rented</span>
+                <span class="date-val">
+                  {{ formatDate(rental.rentalDate) }}
+                </span>
+              </div>
+              <div class="date-item">
+                <span class="date-label">
+                  @if (rental.status === 'Active') {
+                    Expires
+                  } @else {
+                    Expired
+                  }
+                </span>
+                <span class="date-val">
+                  {{ formatDate(rental.expiryDate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions">
+              @if (rental.status === 'Active') {
+                <button class="btn-watch"
+                  (click)="watchMovie(rental)">
+                  Play Now
+                </button>
+                <button class="btn-return"
+                  [disabled]="returningId() === rental.id"
+                  (click)="returnMovie(rental)">
+                  @if (returningId() === rental.id) {
+                    <span class="mini-spin"></span>
+                  } @else {
+                    Return
+                  }
+                </button>
+              } @else {
+                <button class="btn-detail"
+                  (click)="goToMovie(rental)">
+                  View Movie
+                </button>
+                @if (rental.status === 'Expired') {
+                  <button class="btn-rent-again"
+                    (click)="goToMovie(rental)">
+                    Rent Again
+                  </button>
+                }
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

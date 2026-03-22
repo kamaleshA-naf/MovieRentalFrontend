@@ -1,0 +1,429 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: var(--blur-nav);
+  -webkit-backdrop-filter: var(--blur-nav);
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.3s;
+}
+
+.nav-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Brand */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.nav-brand:hover { opacity: 0.85; }
+
+.brand-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #0a84ff, #0055b3);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(10,132,255,0.35);
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text-1);
+  letter-spacing: -0.3px;
+}
+
+/* Nav links */
+.nav-links {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.nav-links a {
+  color: rgba(245,245,247,0.55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--color-text-1);
+  background: rgba(255,255,255,0.06);
+}
+
+.nav-links a.active {
+  color: var(--color-text-1);
+  background: rgba(255,255,255,0.08);
+  font-weight: 600;
+}
+
+/* Right controls */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* Icon button */
+.icon-btn {
+  position: relative;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: rgba(245,245,247,0.6);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover,
+.icon-btn.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-1);
+  border-color: var(--color-border-2);
+}
+
+/* Notification badge */
+.notif-badge {
+  position: absolute;
+  top: -5px; right: -5px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #000;
+  line-height: 1;
+}
+
+/* Notification wrap */
+.notif-wrap { position: relative; }
+
+/* Notification panel */
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 360px;
+  background: rgba(28,28,30,0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 20px 60px rgba(0,0,0,0.8);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  z-index: 300;
+  animation: slideDown 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.notif-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.mark-all-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.mark-all-btn:hover { opacity: 0.75; }
+
+.notif-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+.notif-list::-webkit-scrollbar { width: 3px; }
+.notif-list::-webkit-scrollbar-thumb { background: var(--color-surface-3); }
+
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem;
+  color: rgba(245,245,247,0.35);
+  font-size: 0.85rem;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.notif-item:last-child { border-bottom: none; }
+
+.notif-item:hover { background: rgba(255,255,255,0.04); }
+
+.notif-item.unread { background: rgba(10,132,255,0.05); }
+.notif-item.unread:hover { background: rgba(10,132,255,0.08); }
+
+/* Notification icon */
+.notif-icon-wrap {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: rgba(10,132,255,0.15);
+  color: #0a84ff;
+}
+
+.notif-icon-wrap[data-type="RentalExpiry"]   { background: rgba(255,159,10,0.15); color: #ff9f0a; }
+.notif-icon-wrap[data-type="NewRelease"]     { background: rgba(191,90,242,0.15); color: #bf5af2; }
+.notif-icon-wrap[data-type="PaymentSuccess"] { background: rgba(48,209,88,0.15);  color: #30d158; }
+.notif-icon-wrap[data-type="ReturnReminder"] { background: rgba(255,55,95,0.15);  color: #ff375f; }
+
+.notif-body { flex: 1; min-width: 0; }
+
+.notif-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: 0.2rem;
+}
+
+.notif-msg {
+  font-size: 0.78rem;
+  color: rgba(245,245,247,0.5);
+  line-height: 1.45;
+  margin-bottom: 0.3rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.notif-time {
+  font-size: 0.7rem;
+  color: rgba(245,245,247,0.3);
+  font-weight: 500;
+}
+
+.unread-dot {
+  width: 6px; height: 6px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+  box-shadow: 0 0 6px rgba(10,132,255,0.5);
+}
+
+.notif-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 299;
+}
+
+/* User chip */
+.user-chip {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+}
+
+.user-avatar {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, #0a84ff, #0055b3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(245,245,247,0.65);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Logout */
+.logout-btn {
+  display: none;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: rgba(245,245,247,0.5);
+  align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.logout-btn:hover {
+  background: rgba(255,55,95,0.1);
+  border-color: rgba(255,55,95,0.25);
+  color: var(--color-danger);
+}
+
+/* Burger */
+.burger-btn {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: rgba(245,245,247,0.6);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.burger-btn:hover { background: rgba(255,255,255,0.1); color: var(--color-text-1); }
+
+/* Mobile menu */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.95);
+  gap: 0.1rem;
+  animation: slideDown 0.2s ease;
+}
+
+.mobile-menu a {
+  color: rgba(245,245,247,0.6);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: color 0.2s;
+}
+.mobile-menu a:hover { color: var(--color-text-1); }
+
+.mobile-divider { height: 1px; background: var(--color-border); margin: 0.5rem 0; }
+
+.mobile-logout {
+  margin-top: 0.25rem;
+  background: rgba(255,55,95,0.1);
+  border: 1px solid rgba(255,55,95,0.2);
+  color: var(--color-danger);
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s;
+}
+.mobile-logout:hover { background: rgba(255,55,95,0.18); }
+
+/* Responsive */
+@media (min-width: 768px) {
+  .nav-links  { display: flex; }
+  .user-chip  { display: flex; }
+  .logout-btn { display: flex; }
+  .burger-btn { display: none; }
+}
+/* ✅ Logout confirmation modal */
+.logout-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+.logout-modal {
+  background: #fff; border-radius: 12px;
+  padding: 0; width: 100%; max-width: 340px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.logout-modal-header {
+  background: #ff5c2b;
+  color: #fff; font-size: 1.1rem; font-weight: 700;
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.logout-modal-msg {
+  padding: 1.5rem 1.5rem 1rem;
+  font-size: 0.95rem; color: #374151;
+  text-align: center; line-height: 1.5;
+}
+
+.logout-modal-actions {
+  display: flex; gap: 0.75rem;
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.logout-no {
+  flex: 1; padding: 0.75rem;
+  background: #fff; border: 1.5px solid #ff5c2b;
+  color: #ff5c2b; border-radius: 8px;
+  font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+}
+.logout-no:hover { background: rgba(255,92,43,0.06); }
+
+.logout-yes {
+  flex: 1; padding: 0.75rem;
+  background: #ff5c2b; border: none;
+  color: #fff; border-radius: 8px;
+  font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 4px 14px rgba(255,92,43,0.35);
+}
+.logout-yes:hover { background: #e8501f; transform: translateY(-1px); }

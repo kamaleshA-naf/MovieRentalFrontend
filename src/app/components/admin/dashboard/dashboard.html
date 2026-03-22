@@ -1,0 +1,424 @@
+<div class="page">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <polygon points="10,8 10,16 17,12"/>
+        </svg>
+      </div>
+      <span>MovieBox</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <button class="nav-item" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+        </svg>
+        Overview
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+        Users
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'payments'" (click)="activeTab.set('payments')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+        </svg>
+        Payments
+      </button>
+      <div class="nav-section-label">Manage</div>
+      <button class="nav-item" [class.active]="activeTab() === 'movies'" (click)="activeTab.set('movies')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+        </svg>
+        Movies
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'upload'" (click)="openAdd()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+        Add Movie
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="s-avatar">{{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}</div>
+        <div class="s-user-info">
+          <p class="s-name">{{ auth.currentUser()?.userName }}</p>
+          <p class="s-role">Administrator</p>
+        </div>
+      </div>
+      <button class="sidebar-logout" (click)="auth.requestLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">
+          @if (activeTab() === 'overview') { Dashboard }
+          @if (activeTab() === 'users')    { Users }
+          @if (activeTab() === 'payments') { Payments }
+          @if (activeTab() === 'movies')   { Movies }
+          @if (activeTab() === 'upload')   { Add Movie }
+          @if (activeTab() === 'edit')     { Edit Movie }
+        </h1>
+        <p class="page-sub">
+          @if (activeTab() === 'overview') { Platform overview and key metrics }
+          @if (activeTab() === 'users')    { All registered users and their activity }
+          @if (activeTab() === 'payments') { Payment transactions and revenue }
+          @if (activeTab() === 'movies')   { {{ movieService.movies().length }} movies in catalog }
+          @if (activeTab() === 'upload')   { Add a new movie to the catalog }
+          @if (activeTab() === 'edit')     { Update movie details }
+        </p>
+      </div>
+      <div class="topbar-right">
+        @if (activeTab() === 'overview' || activeTab() === 'users' || activeTab() === 'payments') {
+          <button class="refresh-btn" (click)="loadDashboard()" title="Refresh">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+          </button>
+        }
+        @if (activeTab() === 'movies') {
+          <button class="add-movie-btn" (click)="openAdd()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Movie
+          </button>
+        }
+      </div>
+    </header>
+
+    <div class="main-content">
+
+      @if (isLoading()) {
+        <div class="loading-grid">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="stat-skeleton"></div>
+          }
+        </div>
+      }
+
+      @if (!isLoading() && activeTab() === 'overview' && stats()) {
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">Total Users</p>
+              <p class="stat-value">{{ stats()!.totalUsers }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">Total Movies</p>
+              <p class="stat-value">{{ stats()!.totalMovies }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">Total Rentals</p>
+              <p class="stat-value">{{ stats()!.totalRentals }}</p>
+              <p class="stat-sub">{{ stats()!.activeRentals }} active</p>
+            </div>
+          </div>
+          <div class="stat-card revenue">
+            <div class="stat-icon gold">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">Total Revenue</p>
+              <p class="stat-value">{{ formatCurrency(stats()!.totalRevenue) }}</p>
+              <p class="stat-sub">{{ stats()!.totalPayments }} payments</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <h2>Recent Payments</h2>
+            <button class="tab-link" (click)="activeTab.set('payments')">View all</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>User</th><th>Movie</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                @if (recentPays().length === 0) {
+                  <tr><td colspan="6" class="empty-row">No payments found</td></tr>
+                }
+                @for (p of recentPays().slice(0,8); track p.id) {
+                  <tr>
+                    <td class="td-user">{{ p.userName }}</td>
+                    <td class="td-movie">{{ p.movieTitle }}</td>
+                    <td class="td-amount">₹{{ p.amount }}</td>
+                    <td>{{ p.method }}</td>
+                    <td><span class="status-pill" [class]="statusClass(p.status)">{{ p.status }}</span></td>
+                    <td class="td-date">{{ formatDate(p.paidAt) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <h2>Recent Users</h2>
+            <button class="tab-link" (click)="activeTab.set('users')">View all</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Rentals</th></tr>
+              </thead>
+              <tbody>
+                @if (recentUsers().length === 0) {
+                  <tr><td colspan="4" class="empty-row">No users found</td></tr>
+                }
+                @for (u of recentUsers().slice(0,5); track u.userId) {
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <div class="u-avatar">{{ (u.userName ?? u.name ?? '?').charAt(0).toUpperCase() }}</div>
+                        <span class="td-user">{{ u.userName }}</span>
+                      </div>
+                    </td>
+                    <td class="td-email">{{ u.email }}</td>
+                    <td><span class="role-badge" [class]="'role-' + u.role.toLowerCase()">{{ u.role }}</span></td>
+                    <td>{{ u.totalRentals }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (!isLoading() && activeTab() === 'users') {
+        <div class="section-card">
+          <div class="section-head">
+            <h2>All Users</h2>
+            <span class="count-badge">{{ recentUsers().length }}</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Rentals</th></tr>
+              </thead>
+              <tbody>
+                @if (recentUsers().length === 0) {
+                  <tr><td colspan="4" class="empty-row">No users found</td></tr>
+                }
+                @for (u of recentUsers(); track u.userId) {
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <div class="u-avatar">{{ (u.userName ?? u.name ?? '?').charAt(0).toUpperCase() }}</div>
+                        <span class="td-user">{{ u.userName }}</span>
+                      </div>
+                    </td>
+                    <td class="td-email">{{ u.email }}</td>
+                    <td><span class="role-badge" [class]="'role-' + u.role.toLowerCase()">{{ u.role }}</span></td>
+                    <td>{{ u.totalRentals }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (!isLoading() && activeTab() === 'payments') {
+        <div class="section-card">
+          <div class="section-head">
+            <h2>All Payments</h2>
+            <span class="count-badge">{{ recentPays().length }}</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>ID</th><th>User</th><th>Movie</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                @if (recentPays().length === 0) {
+                  <tr><td colspan="7" class="empty-row">No payments found</td></tr>
+                }
+                @for (p of recentPays(); track p.id) {
+                  <tr>
+                    <td class="td-id">#{{ p.id }}</td>
+                    <td class="td-user">{{ p.userName }}</td>
+                    <td class="td-movie">{{ p.movieTitle }}</td>
+                    <td class="td-amount">₹{{ p.amount }}</td>
+                    <td>{{ p.method }}</td>
+                    <td><span class="status-pill" [class]="statusClass(p.status)">{{ p.status }}</span></td>
+                    <td class="td-date">{{ formatDate(p.paidAt) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (!isLoading() && activeTab() === 'movies') {
+        @if (movieService.movies().length === 0) {
+          <div class="empty-state">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
+              <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+            </svg>
+            <p class="empty-title">No movies yet</p>
+            <p class="empty-sub">Click "Add Movie" to add your first movie.</p>
+            <button class="add-movie-btn" (click)="openAdd()">Add Movie</button>
+          </div>
+        } @else {
+          <div class="section-card">
+            <div class="section-head">
+              <h2>All Movies</h2>
+              <span class="count-badge">{{ movieService.movies().length }}</span>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Thumb</th><th>Title</th><th>Director</th><th>Year</th><th>Price/day</th><th>Genres</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  @for (m of movieService.movies(); track m.id) {
+                    <tr>
+                      <td class="thumb-cell">
+                        @if (m.thumbnailUrl) {
+                          <img [src]="m.thumbnailUrl" [alt]="m.title" class="table-thumb"
+                            (error)="$any($event.target).src='assets/images/placeholders/movie-placeholder.svg'" />
+                        } @else {
+                          <div class="thumb-placeholder">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                              <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                            </svg>
+                          </div>
+                        }
+                      </td>
+                      <td class="td-title">{{ m.title }}</td>
+                      <td class="td-dir">{{ m.director }}</td>
+                      <td>{{ m.releaseYear }}</td>
+                      <td class="td-price">₹{{ m.rentalPrice }}</td>
+                      <td>
+                        <div class="genre-chips">
+                          @for (g of m.genres.slice(0,2); track g.id) {
+                            <span class="genre-chip">{{ g.name }}</span>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-pill" [class]="m.isActive ? 'status-active' : 'status-inactive'">
+                          {{ m.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="action-btns">
+                          <button class="tbl-btn edit" (click)="openEdit(m)" title="Edit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                          </button>
+                          <button class="tbl-btn toggle" (click)="toggleActive(m)"
+                            [title]="m.isActive ? 'Deactivate' : 'Activate'">
+                            @if (m.isActive) {
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                              </svg>
+                            } @else {
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                              </svg>
+                            }
+                          </button>
+                          <button class="tbl-btn delete"
+                            [disabled]="deletingId() === m.id"
+                            (click)="deleteMovie(m)" title="Delete">
+                            @if (deletingId() === m.id) {
+                              <span class="btn-spinner sm"></span>
+                            } @else {
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                              </svg>
+                            }
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+
+      @if (activeTab() === 'upload') {
+        <app-admin-upload-movie [editMovie]="null" (uploaded)="onUploaded()" (cancelled)="onCancelled()">
+        </app-admin-upload-movie>
+      }
+
+      @if (activeTab() === 'edit' && editingMovie()) {
+        <app-admin-upload-movie [editMovie]="editingMovie()" (uploaded)="onUploaded()" (cancelled)="onCancelled()">
+        </app-admin-upload-movie>
+      }
+
+    </div>
+  </main>
+
+  @if (auth.showLogoutModal()) {
+    <div class="logout-overlay">
+      <div class="logout-modal">
+        <div class="logout-modal-header">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+          Sign Out
+        </div>
+        <div class="logout-modal-body">
+          <div class="logout-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="#ff5c2b">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+          </div>
+          <h3 class="logout-modal-title">Are you sure?</h3>
+          <p class="logout-modal-msg">You are about to sign out of your Admin account.<br>Any unsaved work will be lost.</p>
+        </div>
+        <div class="logout-modal-actions">
+          <button class="logout-no" (click)="auth.cancelLogout()">Stay</button>
+          <button class="logout-yes" (click)="auth.confirmLogout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
