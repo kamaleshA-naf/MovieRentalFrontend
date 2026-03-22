@@ -27,7 +27,7 @@ export class CmDashboardComponent implements OnInit {
     this.movieService.loadGenres();
   }
 
-  openAdd(): void { this.editingMovie.set(null); this.activeTab.set('upload'); }
+  openAdd(): void    { this.editingMovie.set(null); this.activeTab.set('upload'); }
   openEdit(movie: MovieResponse): void { this.editingMovie.set(movie); this.activeTab.set('edit'); }
   onUploaded(): void { this.activeTab.set('movies'); this.editingMovie.set(null); this.movieService.getAllMovies(1, 100); }
   onCancelled(): void { this.activeTab.set('movies'); this.editingMovie.set(null); }
@@ -36,8 +36,15 @@ export class CmDashboardComponent implements OnInit {
     if (!confirm(`Delete "${movie.title}"?`)) return;
     this.deletingId.set(movie.id);
     this.movieService.deleteMovie(movie.id).subscribe({
-      next: () => { this.toastr.success(`"${movie.title}" deleted`, 'Deleted'); this.deletingId.set(null); this.movieService.getAllMovies(1, 100); },
-      error: (err) => { this.toastr.error(err.error?.message ?? 'Delete failed', 'Error'); this.deletingId.set(null); }
+      next: () => {
+        this.toastr.success(`"${movie.title}" deleted`, 'Deleted');
+        this.deletingId.set(null);
+        this.movieService.getAllMovies(1, 100);
+      },
+      error: (err: any) => {
+        this.toastr.error(err?.error?.message ?? 'Delete failed', 'Error');
+        this.deletingId.set(null);
+      }
     });
   }
 
@@ -45,7 +52,10 @@ export class CmDashboardComponent implements OnInit {
     const msg = movie.isActive ? `Pause "${movie.title}"?` : `Activate "${movie.title}"?`;
     if (!confirm(msg)) return;
     this.movieService.updateMovie(movie.id, { isActive: !movie.isActive }).subscribe({
-      next: () => { this.toastr.success(`Movie ${movie.isActive ? 'deactivated' : 'activated'}`, 'Updated'); this.movieService.getAllMovies(1, 100); },
+      next: () => {
+        this.toastr.success(`Movie ${movie.isActive ? 'deactivated' : 'activated'}`, 'Updated');
+        this.movieService.getAllMovies(1, 100);
+      },
       error: () => this.toastr.error('Update failed', 'Error')
     });
   }

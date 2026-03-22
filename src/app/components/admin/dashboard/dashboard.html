@@ -1,3 +1,7 @@
+<!-- ADMIN DASHBOARD - dashboard.html -->
+<!-- KEY FIX: NO <app-navbar> here. Admin has its own sidebar layout. -->
+<!-- ALSO: Logout modal completely removed. Sidebar logout calls auth.logout() directly. -->
+
 <div class="page">
 
   <aside class="sidebar">
@@ -53,7 +57,8 @@
           <p class="s-role">Administrator</p>
         </div>
       </div>
-      <button class="sidebar-logout" (click)="auth.requestLogout()">
+      <!-- FIXED: Direct logout, no modal -->
+      <button class="sidebar-logout" (click)="auth.logout()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
         </svg>
@@ -292,9 +297,6 @@
       @if (!isLoading() && activeTab() === 'movies') {
         @if (movieService.movies().length === 0) {
           <div class="empty-state">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
-              <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
-            </svg>
             <p class="empty-title">No movies yet</p>
             <p class="empty-sub">Click "Add Movie" to add your first movie.</p>
             <button class="add-movie-btn" (click)="openAdd()">Add Movie</button>
@@ -394,31 +396,5 @@
 
     </div>
   </main>
-
-  @if (auth.showLogoutModal()) {
-    <div class="logout-overlay">
-      <div class="logout-modal">
-        <div class="logout-modal-header">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-          </svg>
-          Sign Out
-        </div>
-        <div class="logout-modal-body">
-          <div class="logout-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="#ff5c2b">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-          </div>
-          <h3 class="logout-modal-title">Are you sure?</h3>
-          <p class="logout-modal-msg">You are about to sign out of your Admin account.<br>Any unsaved work will be lost.</p>
-        </div>
-        <div class="logout-modal-actions">
-          <button class="logout-no" (click)="auth.cancelLogout()">Stay</button>
-          <button class="logout-yes" (click)="auth.confirmLogout()">Sign Out</button>
-        </div>
-      </div>
-    </div>
-  }
 
 </div>

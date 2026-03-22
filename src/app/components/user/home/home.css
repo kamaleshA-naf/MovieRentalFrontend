@@ -556,3 +556,93 @@ page { min-height: 100vh; background: #000; }
  .toolbar { flex-direction: column; align-items: stretch; }
  .search-wrap { max-width: 100%; }
 }
+/* ── ADD TO YOUR EXISTING home.css ─────────────────────────── */
+/* Paste this at the bottom of your existing home.css */
+
+/* Grid footer (title + cart btn row) */
+.grid-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.grid-genres {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.grid-genres span {
+  background: rgba(10,132,255,0.1);
+  border: 1px solid rgba(10,132,255,0.2);
+  color: #0a84ff;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+/* Row footer */
+.row-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+  padding-top: 0.15rem;
+}
+
+/* ── CARD CART BUTTON ──────────────────── */
+.card-cart-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(10,132,255,0.3);
+  background: rgba(10,132,255,0.1);
+  color: #0a84ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+
+.card-cart-btn:hover:not(:disabled) {
+  background: rgba(10,132,255,0.25);
+  border-color: rgba(10,132,255,0.5);
+  transform: scale(1.08);
+}
+
+.card-cart-btn.added {
+  background: rgba(48,209,88,0.12);
+  border-color: rgba(48,209,88,0.3);
+  color: #30d158;
+  cursor: default;
+}
+
+.card-cart-btn.sm {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+}
+
+.card-cart-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Mini spinner inside cart btn */
+.mini-spin {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgba(10,132,255,0.3);
+  border-top-color: #0a84ff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

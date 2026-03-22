@@ -1,24 +1,25 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule }       from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService }         from '../../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
-import { CartService }         from '../../../services/cart.service';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
-  selector:  'app-navbar',
+  selector: 'app-navbar',
   standalone: true,
-  imports:   [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
-  styleUrl:    './navbar.css'
+  styleUrl: './navbar.css'
 })
 export class NavbarComponent implements OnInit {
   auth            = inject(AuthService);
   notificationSvc = inject(NotificationService);
   cartService     = inject(CartService);
 
-  menuOpen  = signal(false);
-  notifOpen = signal(false);
+  menuOpen      = signal(false);
+  notifOpen     = signal(false);
+  showLogoutDrop = signal(false);
 
   ngOnInit(): void {
     const userId = this.auth.currentUser()?.userId;
@@ -28,9 +29,17 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  // ✅ Just calls auth.logout() — toast is inside auth.logout()
-  logout(): void {
+  toggleLogoutDrop(): void {
+    this.showLogoutDrop.update(v => !v);
+  }
+
+  confirmLogout(): void {
+    this.showLogoutDrop.set(false);
     this.auth.logout();
+  }
+
+  cancelLogout(): void {
+    this.showLogoutDrop.set(false);
   }
 
   markRead(id: number): void {
@@ -43,11 +52,8 @@ export class NavbarComponent implements OnInit {
   }
 
   markAllRead(): void {
-    const unread = this.notificationSvc.notifications()
-      .filter(n => !n.isRead);
-    unread.forEach(n => {
-      this.notificationSvc.markAsRead(n.id).subscribe();
-    });
+    const unread = this.notificationSvc.notifications().filter(n => !n.isRead);
+    unread.forEach(n => this.notificationSvc.markAsRead(n.id).subscribe());
     setTimeout(() => {
       const userId = this.auth.currentUser()?.userId;
       if (userId) this.notificationSvc.loadNotifications(userId);

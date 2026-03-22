@@ -22,10 +22,9 @@ export class AuthService {
   private tokenSvc = inject(TokenService);
   private toastr   = inject(ToastrService);
 
-  isLoading       = signal(false);
-  error           = signal<string | null>(null);
-  currentUser     = signal<CurrentUser | null>(null);
-  showLogoutModal = signal(false);
+  isLoading   = signal(false);
+  error       = signal<string | null>(null);
+  currentUser = signal<CurrentUser | null>(null);
 
   constructor() {
     if (this.tokenSvc.isValid()) {
@@ -41,14 +40,8 @@ export class AuthService {
   get isLoggedIn(): boolean { return this.tokenSvc.isValid(); }
   getToken(): string | null { return this.tokenSvc.get(); }
 
-  /** Show confirmation modal before logging out */
-  requestLogout(): void {
-    this.showLogoutModal.set(true);
-  }
-
-  /** User clicked "Yes" — perform actual logout */
-  confirmLogout(): void {
-    this.showLogoutModal.set(false);
+  /** Direct logout — no modal */
+  logout(): void {
     this.tokenSvc.remove();
     this.currentUser.set(null);
     this.error.set(null);
@@ -59,19 +52,6 @@ export class AuthService {
       { timeOut: 3000, positionClass: 'toast-top-center', progressBar: true }
     );
     this.router.navigate(['/login']);
-  }
-
-  /** User clicked "No" */
-  cancelLogout(): void {
-    this.showLogoutModal.set(false);
-  }
-
-  /**
-   * All logout buttons call requestLogout() which shows the modal.
-   * This method now ALSO shows modal (was bypassing it before).
-   */
-  logout(): void {
-    this.requestLogout();
   }
 
   login(req: LoginRequest): void {

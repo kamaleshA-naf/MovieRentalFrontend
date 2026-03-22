@@ -36,181 +36,39 @@
           }
         </button>
 
-        <!-- Notification panel -->
         @if (notifOpen()) {
           <div class="notif-panel">
             <div class="notif-header">
               <h3>Notifications</h3>
               @if (notificationSvc.unreadCount() > 0) {
-                <button class="mark-all-btn" (click)="markAllRead()">
-                  Mark all read
-                </button>
-              }
-            </div>
-
-            <div class="notif-list">
-              @if (notificationSvc.notifications().length === 0) {
-                <div class="notif-empty">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" opacity="0.2">
-                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                  </svg>
-                  <p>No notifications</p>
-                </div>
-              }
-
-             <!-- Replace the notification for-loop item div with: -->
-@for (n of notificationSvc.notifications(); track n.id) {
-  <div class="notif-item"
-    [class.unread]="!n.isRead"
-    (click)="markRead(n.id)">
-
-    <div class="notif-icon-wrap">
-      @if (notifIcon(n.type) === 'clock') {
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
-        </svg>
-      } @else if (notifIcon(n.type) === 'star') {
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-        </svg>
-      } @else if (notifIcon(n.type) === 'check') {
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-        </svg>
-      } @else {
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-        </svg>
-      }
-    </div>
-
-    <div class="notif-body">
-      <p class="notif-title">{{ n.title }}</p>
-      <p class="notif-msg">{{ n.message }}</p>
-      <p class="notif-time">{{ timeAgo(n.createdAt) }}</p>
-    </div>
-
-    @if (!n.isRead) {
-      <div class="unread-dot"></div>
-    }
-  </div>
-}
-            </div>
-          </div>
-          <!-- Backdrop -->
-          <div class="notif-backdrop" (click)="notifOpen.set(false)"></div>
-        }
-      </div>
-
-      <!-- User info -->
-      <div class="user-chip">
-        <div class="user-avatar">
-          {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
-        </div>
-        <span class="user-name">{{ auth.currentUser()?.userName }}</span>
-      </div>
-
-      <!-- Logout -->
-      <button class="logout-btn" (click)="logout()" title="Sign out">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-        </svg>
-      </button>
-      
-      <a routerLink="/cart" class="nav-cart">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-      </svg>
-      @if (cartService.cartCount() > 0) {
-        <span class="cart-badge">{{ cartService.cartCount() }}</span>
-      }
-</a>
-
-      <!-- Burger -->
-      <button class="burger-btn" (click)="menuOpen.update(v => !v)">
-        @if (menuOpen()) {
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-          </svg>
-        } @else {
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        }
-      </button>
-
-    </div>
-  </div>
-  
-
-  <!-- Mobile menu -->
-  @if (menuOpen()) {
-    <div class="mobile-menu">
-      <a routerLink="/home"       (click)="menuOpen.set(false)">Home</a>
-      <a routerLink="/my-rentals" (click)="menuOpen.set(false)">My Rentals</a>
-      <a routerLink="/wishlist"   (click)="menuOpen.set(false)">Wishlist</a>
-      <div class="mobile-divider"></div>
-      <button class="mobile-logout" (click)="auth.logout()">Sign Out</button>
-    </div>
-  }
-</nav>
-<nav class="nav" [class.menu-open]="menuOpen()">
-  <div class="nav-inner">
-
-    <!-- Brand -->
-    <a routerLink="/home" class="nav-brand">
-      <div class="brand-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-          <polygon points="10,8 10,16 17,12"/>
-        </svg>
-      </div>
-      <span class="brand-name">MovieBox</span>
-    </a>
-
-    <!-- Desktop links -->
-    <div class="nav-links">
-      <a routerLink="/home"       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
-      <a routerLink="/my-rentals" routerLinkActive="active">My Rentals</a>
-      <a routerLink="/wishlist"   routerLinkActive="active">Wishlist</a>
-      <a routerLink="/profile"    routerLinkActive="active">Profile</a>
-    </div>
-
-    <!-- Right controls -->
-    <div class="nav-right">
-
-      <!-- Notification bell -->
-      <div class="notif-wrap">
-        <button class="icon-btn" (click)="notifOpen.update(v => !v)"
-          [class.active]="notifOpen()" title="Notifications">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-          </svg>
-          @if (notificationSvc.unreadCount() > 0) {
-            <span class="notif-badge">
-              {{ notificationSvc.unreadCount() > 9 ? '9+' : notificationSvc.unreadCount() }}
-            </span>
-          }
-        </button>
-
-        @if (notifOpen()) {
-          <div class="notif-panel">
-            <div class="notif-header">
-              <h3>Notifications</h3>
-              @if (notificationSvc.unreadCount() > 0) {
-                <button class="mark-all-btn" (click)="markAllRead()">
-                  Mark all read
-                </button>
+                <button class="mark-all-btn" (click)="markAllRead()">Mark all read</button>
               }
             </div>
             <div class="notif-list">
               @if (notificationSvc.notifications().length === 0) {
-                <div class="notif-empty">
-                  <p>No notifications</p>
-                </div>
+                <div class="notif-empty"><p>No notifications</p></div>
               }
               @for (n of notificationSvc.notifications(); track n.id) {
-                <div class="notif-item" [class.unread]="!n.isRead"
-                  (click)="markRead(n.id)">
+                <div class="notif-item" [class.unread]="!n.isRead" (click)="markRead(n.id)">
+                  <div class="notif-icon-wrap" [attr.data-type]="n.type">
+                    @if (notifIcon(n.type) === 'clock') {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                      </svg>
+                    } @else if (notifIcon(n.type) === 'star') {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                      </svg>
+                    } @else if (notifIcon(n.type) === 'check') {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                    } @else {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                      </svg>
+                    }
+                  </div>
                   <div class="notif-body">
                     <p class="notif-title">{{ n.title }}</p>
                     <p class="notif-msg">{{ n.message }}</p>
@@ -225,6 +83,16 @@
         }
       </div>
 
+      <!-- Cart Icon -->
+      <a routerLink="/cart" class="icon-btn cart-btn" title="Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        @if (cartService.cartCount() > 0) {
+          <span class="notif-badge cart-count">{{ cartService.cartCount() }}</span>
+        }
+      </a>
+
       <!-- User chip -->
       <div class="user-chip">
         <div class="user-avatar">
@@ -233,22 +101,26 @@
         <span class="user-name">{{ auth.currentUser()?.userName }}</span>
       </div>
 
-      <!-- Cart -->
-      <a routerLink="/cart" class="nav-cart">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-        </svg>
-        @if (cartService.cartCount() > 0) {
-          <span class="cart-badge">{{ cartService.cartCount() }}</span>
-        }
-      </a>
+      <!-- Logout with dropdown confirm -->
+      <div class="logout-wrap">
+        <button class="logout-btn" (click)="toggleLogoutDrop()" title="Sign out"
+          [class.active]="showLogoutDrop()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+          </svg>
+        </button>
 
-      <!-- ✅ Logout — opens modal -->
-      <button class="logout-btn" (click)="auth.requestLogout()" title="Sign out">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-        </svg>
-      </button>
+        @if (showLogoutDrop()) {
+          <div class="logout-drop">
+            <p class="logout-drop-q">Sign out?</p>
+            <div class="logout-drop-actions">
+              <button class="drop-cancel" (click)="cancelLogout()">Cancel</button>
+              <button class="drop-confirm" (click)="confirmLogout()">Sign Out</button>
+            </div>
+          </div>
+          <div class="notif-backdrop" (click)="cancelLogout()"></div>
+        }
+      </div>
 
       <!-- Burger -->
       <button class="burger-btn" (click)="menuOpen.update(v => !v)">
@@ -271,27 +143,9 @@
       <a routerLink="/home"       (click)="menuOpen.set(false)">Home</a>
       <a routerLink="/my-rentals" (click)="menuOpen.set(false)">My Rentals</a>
       <a routerLink="/wishlist"   (click)="menuOpen.set(false)">Wishlist</a>
+      <a routerLink="/cart"       (click)="menuOpen.set(false)">Cart</a>
       <div class="mobile-divider"></div>
-      <button class="mobile-logout" (click)="auth.requestLogout()">Sign Out</button>
+      <button class="mobile-logout" (click)="confirmLogout()">Sign Out</button>
     </div>
   }
 </nav>
-
-<!-- ✅ LOGOUT CONFIRMATION MODAL — same design as your screenshot -->
-@if (auth.showLogoutModal()) {
-  <div class="logout-overlay">
-    <div class="logout-modal">
-      <div class="logout-modal-header">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-        </svg>
-        Logout
-      </div>
-      <p class="logout-modal-msg">Are you sure you want to Logout?</p>
-      <div class="logout-modal-actions">
-        <button class="logout-no" (click)="auth.cancelLogout()">No</button>
-        <button class="logout-yes" (click)="auth.confirmLogout()">Yes</button>
-      </div>
-    </div>
-  </div>
-}
