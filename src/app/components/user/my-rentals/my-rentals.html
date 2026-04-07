@@ -1,0 +1,272 @@
+<div class="page">
+  <app-navbar />
+
+  <!-- ── REFUND MODAL ──────────────────────────────────────── -->
+  @if (refundRental()) {
+    <div class="modal-backdrop" (click)="closeRefundModal()">
+      <div class="refund-modal" (click)="$event.stopPropagation()">
+
+        @if (!refundSuccess()) {
+          <div class="refund-header">
+            <h3>Return Rental</h3>
+            <p class="refund-movie">{{ refundRental()!.movieTitle }}</p>
+          </div>
+          <div class="refund-body">
+            <div class="refund-row">
+              <span>Amount Paid</span>
+              <strong>₹{{ amountPaid(refundRental()!) }}.00</strong>
+            </div>
+            <div class="refund-row">
+              <span>Refund Eligibility</span>
+              <strong class="refund-pct">{{ refundPercent(refundRental()!) }}%</strong>
+            </div>
+            <div class="refund-row highlight">
+              <span>Refund Amount</span>
+              <strong class="refund-amt">₹{{ refundAmount(refundRental()!) }}.00</strong>
+            </div>
+            <p class="refund-policy">
+              Returned within 24 hours of rental: 90% refund &nbsp;|&nbsp; After 24 hours: 0%
+            </p>
+          </div>
+          <div class="refund-actions">
+            <button class="btn-cancel-refund" (click)="closeRefundModal()">Cancel</button>
+            <button class="btn-confirm-refund"
+              [disabled]="returningId() === refundRental()!.id"
+              (click)="confirmReturn()">
+              @if (returningId() === refundRental()!.id) {
+                <span class="mini-spin"></span> Processing…
+              } @else {
+                Proceed with Refund
+              }
+            </button>
+          </div>
+        } @else {
+          <!-- Success state -->
+          <div class="refund-success">
+            <div class="success-check">✓</div>
+            <h3>Refund Successful!</h3>
+            <p class="txn-id">Transaction ID: <strong>{{ refundTxnId() }}</strong></p>
+            <p class="refund-credit">
+              ₹{{ refundAmount(refundRental()!) }} will be credited to your account within 2–4 business days.
+            </p>
+            <button class="btn-confirm-refund" (click)="closeRefundModal()">Done</button>
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+  <div class="rentals-content">
+
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">My Rentals</h2>
+        <p class="page-sub">
+          {{ activeCount() }} active ·
+          {{ rentalService.myRentals().length }} total
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+      <button class="tab"
+        [class.active]="activeFilter() === 'all'"
+        (click)="activeFilter.set('all')">
+        All
+        <span class="tab-count">
+          {{ rentalService.myRentals().length }}
+        </span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Active'"
+        (click)="activeFilter.set('Active')">
+        Active
+        <span class="tab-count active-count">
+          {{ activeCount() }}
+        </span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Expired'"
+        (click)="activeFilter.set('Expired')">
+        Expired
+        <span class="tab-count">{{ expiredCount() }}</span>
+      </button>
+      <button class="tab"
+        [class.active]="activeFilter() === 'Returned'"
+        (click)="activeFilter.set('Returned')">
+        Returned
+        <span class="tab-count">{{ returnedCount() }}</span>
+      </button>
+    </div>
+
+    <!-- Carousel view — all filtered rentals -->
+    @if (!rentalService.isLoading() && filtered().length > 0) {
+      <app-carousel
+        [title]="activeFilter() === 'all' ? 'All Rentals' : activeFilter() + ' Rentals'"
+        [items]="toCarouselItems(filtered())"
+        [pageSize]="20"
+        [loading]="rentalService.isLoading()"
+        (itemClick)="onCarouselClick($event)" />
+    }
+
+    <!-- Loading -->
+    @if (rentalService.isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        Loading your rentals...
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!rentalService.isLoading() && filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <h3>No rentals found</h3>
+        <p>
+          @if (activeFilter() === 'all') {
+            You have not rented any movies yet.
+          } @else {
+            No {{ activeFilter().toLowerCase() }} rentals.
+          }
+        </p>
+        <button class="browse-btn"
+          (click)="router.navigate(['/home'])">
+          Browse Movies
+        </button>
+      </div>
+    }
+
+    <!-- Rental cards -->
+    @if (!rentalService.isLoading() && filtered().length > 0) {
+      <div class="rentals-grid">
+        @for (rental of filtered(); track rental.id) {
+          <div class="rental-card"
+            [class.card-active]="rental.status === 'Active'"
+            [class.card-expired]="rental.status === 'Expired'"
+            [class.card-returned]="rental.status === 'Returned'">
+
+            <div class="card-top">
+              <div class="movie-info">
+                <h4 class="movie-title">{{ rental.movieTitle }}</h4>
+                <span class="status-pill"
+                  [class]="statusClass(rental.status)">
+                  {{ rental.status }}
+                </span>
+              </div>
+              @if (rental.status === 'Active') {
+                <div class="days-info">
+                  <span class="days-num">
+                    {{ daysLeft(rental.expiryDate) }}
+                  </span>
+                  <span class="days-label">days left</span>
+                </div>
+              }
+            </div>
+
+            <!-- Progress bar — only for Active rentals -->
+            @if (rental.status === 'Active') {
+              <div class="progress-wrap">
+                <div class="progress-bar">
+                  <div class="progress-fill"
+                    [style.width.%]="progressWidth(rental)">
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Dates -->
+            <div class="date-row">
+              <div class="date-item">
+                <span class="date-label">Rented</span>
+                <span class="date-val">
+                  {{ formatDate(rental.rentalDate) }}
+                </span>
+              </div>
+              <div class="date-item">
+                <span class="date-label">
+                  @if (rental.status === 'Active') {
+                    Expires
+                  } @else {
+                    Expired
+                  }
+                </span>
+                <span class="date-val">
+                  {{ formatDate(rental.expiryDate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions">
+              @if (rental.status === 'Active') {
+                @if (isMovieDeleted(rental.movieId)) {
+                  <div class="unavailable-msg">
+                    <span class="badge-unavailable">Movie Unavailable</span>
+                    <p class="unavail-text">This movie is currently unavailable. We will fix it as soon as possible.</p>
+                  </div>
+                } @else {
+                  <button class="btn-watch" (click)="watchMovie(rental)">
+                    ▶ Play Now
+                  </button>
+                  @if (canReturn(rental)) {
+                    <button class="btn-return"
+                      [disabled]="returningId() === rental.id"
+                      (click)="returnMovie(rental)">
+                      @if (returningId() === rental.id) {
+                        <span class="mini-spin"></span>
+                      } @else {
+                        Return
+                      }
+                    </button>
+                  }
+                }
+              } @else if (rental.status === 'Expired') {
+                @if (isMovieDeleted(rental.movieId)) {
+                  <div class="unavailable-msg">
+                    <span class="badge-unavailable">Movie Unavailable</span>
+                    <p class="unavail-text">This movie is currently unavailable. We will fix it as soon as possible.</p>
+                  </div>
+                } @else {
+                  <button class="btn-renew"
+                    [class.renewing]="renewingId() === rental.id"
+                    [disabled]="renewingId() === rental.id"
+                    (click)="renewRental(rental)">
+                    @if (renewingId() === rental.id) {
+                      <span class="mini-spin-green"></span>
+                      Renewing…
+                    } @else {
+                      ↻ Renew +3 days
+                    }
+                  </button>
+                  <button class="btn-detail" (click)="goToMovie(rental)">
+                    View
+                  </button>
+                }
+              } @else {
+                <!-- Returned -->
+                <p class="rental-expired-msg">Rental expired</p>
+                @if (!isMovieDeleted(rental.movieId)) {
+                  <button class="btn-renew" (click)="goToMovie(rental)">
+                    ↻ Renew Rental
+                  </button>
+                  <button class="btn-detail" (click)="goToMovie(rental)">
+                    View Movie
+                  </button>
+                } @else {
+                  <div class="unavailable-msg">
+                    <span class="badge-unavailable">Movie Unavailable</span>
+                    <p class="unavail-text">This movie is currently unavailable. We will fix it as soon as possible.</p>
+                  </div>
+                }
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

@@ -1,0 +1,176 @@
+<div class="page">
+  <app-navbar />
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" class="title-icon">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          My Favourites
+        </h1>
+        <p class="page-sub">{{ allWishlist().length }} movie{{ allWishlist().length !== 1 ? 's' : '' }} saved · Watch anytime</p>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="load-center"><div class="spinner"></div></div>
+    }
+
+    @if (!isLoading() && allWishlist().length === 0) {
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.12">
+          <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/>
+        </svg>
+        <p class="empty-title">No favourites yet</p>
+        <p class="empty-sub">Browse movies and save ones you'd like to watch</p>
+        <button class="browse-btn" (click)="router.navigate(['/home'])">Browse Movies</button>
+      </div>
+    }
+
+    @if (!isLoading() && allWishlist().length > 0) {
+
+      <!-- Carousel at top -->
+      <app-carousel
+        title="My Favourites"
+        badge="Saved Movies"
+        badgeClass="carousel-badge-red"
+        [items]="toCarouselItems(allWishlist())"
+        [pageSize]="20"
+        [loading]="isLoading()"
+        (itemClick)="onCarouselClick($event)" />
+
+      <div class="layout">
+
+        <!-- ALL wishlist movies — rented or not, always visible -->
+        <div class="movie-grid">
+          @for (item of allWishlist(); track item.id) {
+            <div class="movie-card" [class.is-rented]="hasAccess(item.movieId)">
+
+              <!-- Poster -->
+              <div class="poster-wrap" (click)="viewMovie(item.movieId)">
+                @if (item.thumbnailUrl) {
+                  <img [src]="item.thumbnailUrl" [alt]="item.movieTitle"
+                    class="poster-img" (error)="onImgError($event)" />
+                } @else {
+                  <div class="poster-fallback">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" opacity="0.2">
+                      <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                    </svg>
+                    <p class="fallback-text">No Image</p>
+                  </div>
+                }
+
+                <!-- Hover overlay -->
+                <div class="poster-overlay">
+                  <div class="play-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Rented badge -->
+                @if (hasAccess(item.movieId)) {
+                  <span class="rented-badge">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Rented
+                  </span>
+                } @else {
+                  <span class="price-tag">₹{{ item.rentalPrice }}/day</span>
+                }
+              </div>
+
+              <!-- Card info -->
+              <div class="card-body">
+                <h3 class="card-title" (click)="viewMovie(item.movieId)">{{ item.movieTitle }}</h3>
+                <p class="card-date">Saved {{ formatDate(item.addedDate) }}</p>
+
+                <div class="card-actions">
+                  @if (isMovieDeleted(item.movieId)) {
+                    <span class="unavailable-tag">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                      Unavailable
+                    </span>
+                  } @else if (hasAccess(item.movieId)) {
+                    <!-- Already rented — show Watch Now prominently -->
+                    <button class="btn-watch" (click)="watchOrRent(item)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      Watch Now
+                    </button>
+                  } @else {
+                    <!-- Not rented — show Rent Now -->
+                    <button class="btn-rent" (click)="watchOrRent(item)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                      Rent Now
+                    </button>
+                  }
+                  <button class="btn-remove" [disabled]="removingId() === item.id"
+                    (click)="remove(item)" title="Remove from favourites">
+                    @if (removingId() === item.id) {
+                      <span class="btn-spin"></span>
+                    } @else {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Summary sidebar — shows ALL saved movies -->
+        <aside class="summary-card">
+          <h3 class="summary-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color:#ff375f">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            Saved Movies
+          </h3>
+
+          <div class="summary-list">
+            @for (item of allWishlist(); track item.id) {
+              <div class="summary-row">
+                <div class="summary-info">
+                  <span class="summary-name">{{ item.movieTitle }}</span>
+                  @if (hasAccess(item.movieId)) {
+                    <span class="summary-status rented">Rented</span>
+                  }
+                </div>
+                @if (hasAccess(item.movieId)) {
+                  <button class="ar-watch" (click)="watchOrRent(item)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Watch
+                  </button>
+                } @else {
+                  <span class="summary-price">₹{{ item.rentalPrice }}/day</span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="summary-sep"></div>
+
+          <div class="summary-total">
+            <span>Unwatched total</span>
+            <strong>₹{{ totalCost() }}/day</strong>
+          </div>
+
+          <p class="summary-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            Saved movies stay here forever. Rent to watch anytime.
+          </p>
+
+          <button class="btn-start" (click)="rentAll()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            Start Watching
+          </button>
+        </aside>
+
+      </div>
+    }
+  </div>
+</div>

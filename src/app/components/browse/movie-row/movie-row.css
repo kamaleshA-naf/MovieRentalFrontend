@@ -1,0 +1,71 @@
+.row-section { margin-bottom: 2.5rem; }
+
+.row-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding: 0 3rem;
+}
+
+.row-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f5f5f7;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.row-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(229,9,20,0.15);
+  color: #e50914;
+  border: 1px solid rgba(229,9,20,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.empty-row {
+  padding: 0 3rem;
+  color: rgba(245,245,247,0.3);
+  font-size: 0.85rem;
+}
+
+.scroll-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.row-track {
+  display: flex;
+  gap: 12px;
+  padding: 8px 3rem 12px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.arr {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 80px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  color: #fff;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  border-radius: 4px;
+}
+.arr:hover { background: rgba(0,0,0,0.9); }
+.arr.left  { left: 0; }
+.arr.right { right: 0; }

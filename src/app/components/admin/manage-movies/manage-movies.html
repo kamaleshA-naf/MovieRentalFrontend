@@ -1,0 +1,282 @@
+<div class="page">
+
+  <!-- ── CONFIRM MODAL ─────────────────────────────────── -->
+  @if (confirmState().show) {
+    <div class="modal-backdrop" (click)="closeConfirm()">
+      <div class="confirm-modal" (click)="$event.stopPropagation()">
+        <div class="confirm-icon" [class.danger]="confirmState().danger"
+          [class.safe]="!confirmState().danger">
+          @if (confirmState().danger) {
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          } @else {
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          }
+        </div>
+        <h3 class="confirm-title">{{ confirmState().title }}</h3>
+        <p class="confirm-msg">{{ confirmState().message }}</p>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" (click)="closeConfirm()">Cancel</button>
+          <button class="confirm-ok"
+            [class.danger]="confirmState().danger"
+            [class.safe]="!confirmState().danger"
+            (click)="confirmState().onYes()">
+            {{ confirmState().danger ? 'Yes, proceed' : 'Activate' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <div>
+        <h1 class="page-title">Manage Movies</h1>
+        <p class="page-sub">{{ filtered().length }} of {{ movieService.movies().length }} movies · Page {{ page()+1 }} of {{ totalPages() }}</p>
+      </div>
+    </div>
+    <button class="upload-btn" (click)="goUpload()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      Add Movie
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="search-icon">
+      <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    </svg>
+    <input type="text" placeholder="Search movies or directors..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value); page.set(0)" />
+    @if (searchQuery()) {
+      <button class="search-clear" (click)="searchQuery.set(''); page.set(0)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    }
+  </div>
+
+  <!-- Rating filter -->
+  <div class="rating-filter-row">
+    <span class="rf-label">Filter by rating:</span>
+    <button class="rf-btn" [class.active]="ratingFilter() === 'all'" (click)="ratingFilter.set('all'); page.set(0)">All</button>
+    <button class="rf-btn love" [class.active]="ratingFilter() === 'love'" (click)="ratingFilter.set('love'); page.set(0)" title="Love This">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Love
+    </button>
+    <button class="rf-btn like" [class.active]="ratingFilter() === 'like'" (click)="ratingFilter.set('like'); page.set(0)" title="I Like This">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+      Like
+    </button>
+    <button class="rf-btn dislike" [class.active]="ratingFilter() === 'dislike'" (click)="ratingFilter.set('dislike'); page.set(0)" title="Not for Me">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+      Not For Me
+    </button>
+    <button class="rf-btn total" [class.active]="ratingFilter() === 'total'" (click)="ratingFilter.set('total'); page.set(0)" title="Total Ratings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+      Total
+    </button>
+  </div>
+
+  @if (movieService.isLoading()) {
+    <div class="loading-wrap">
+      <div class="loading-spinner"></div>
+      <p>Loading movies</p>
+    </div>
+  }
+
+  @if (!movieService.isLoading()) {
+    <div class="table-card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="th-sort" (click)="toggleSort('title')">
+                Movie
+                <span class="sort-icon" [class.active]="sortCol()==='title'" [class.desc]="sortCol()==='title'&&sortDir()==='desc'">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l-7 7h14z"/></svg>
+                </span>
+              </th>
+              <th>Director</th>
+              <th class="th-sort" (click)="toggleSort('year')">
+                Year
+                <span class="sort-icon" [class.active]="sortCol()==='year'" [class.desc]="sortCol()==='year'&&sortDir()==='desc'">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l-7 7h14z"/></svg>
+                </span>
+              </th>
+              <th class="th-sort" (click)="toggleSort('price')">
+                Price
+                <span class="sort-icon" [class.active]="sortCol()==='price'" [class.desc]="sortCol()==='price'&&sortDir()==='desc'">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l-7 7h14z"/></svg>
+                </span>
+              </th>
+              <th class="th-sort" (click)="toggleSort('rating')">
+                Rating
+                <span class="sort-icon" [class.active]="sortCol()==='rating'" [class.desc]="sortCol()==='rating'&&sortDir()==='desc'">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l-7 7h14z"/></svg>
+                </span>
+              </th>
+              <th>Genres</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (pagedMovies().length === 0) {
+              <tr>
+                <td colspan="7" class="empty-row">
+                  @if (searchQuery()) { No movies match "{{ searchQuery() }}" }
+                  @else { No movies found. }
+                </td>
+              </tr>
+            }
+            @for (movie of pagedMovies(); track movie.id) {
+              <tr>
+                <td>
+                  <div class="movie-cell">
+                    @if (movie.thumbnailUrl) {
+                      <img [src]="movie.thumbnailUrl" [alt]="movie.title" class="movie-thumb"
+                        (error)="$any($event.target).style.display='none'" />
+                    } @else {
+                      <div class="movie-thumb-placeholder"></div>
+                    }
+                    <span class="movie-title">{{ movie.title }}</span>
+                  </div>
+                </td>
+                <td class="td-secondary">{{ movie.director }}</td>
+                <td class="td-secondary">{{ movie.releaseYear }}</td>
+                <td class="td-price">₹{{ movie.rentalPrice }}</td>
+                <td>
+                  <div class="rating-cell">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="#ffd60a">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    {{ movie.rating }}
+                  </div>
+                </td>
+                <td>
+                  <div class="genre-chips">
+                    @for (g of movie.genres.slice(0,2); track g.id) {
+                      <span class="genre-chip">{{ g.name }}</span>
+                    }
+                    @if (movie.genres.length > 2) {
+                      <span class="genre-chip more">+{{ movie.genres.length - 2 }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="tbl-btn edit" (click)="openEdit(movie)" title="Edit">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                    </button>
+                    <button class="tbl-btn delete"
+                      [disabled]="deletingId() === movie.id"
+                      (click)="deleteMovie(movie)" title="Delete">
+                      @if (deletingId() === movie.id) {
+                        <span class="btn-spinner"></span>
+                      } @else {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (totalPages() > 1) {
+        <div class="table-pagination">
+          <button class="pg-btn" [disabled]="page()===0" (click)="page.update(p=>p-1)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            Prev
+          </button>
+          <span class="pg-info">Page {{ page()+1 }} of {{ totalPages() }} · {{ filtered().length }} movies</span>
+          <button class="pg-btn" [disabled]="page()>=totalPages()-1" (click)="page.update(p=>p+1)">
+            Next
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Edit Modal -->
+  @if (editingMovie()) {
+    <div class="modal-backdrop" (click)="closeEdit()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Edit Movie</h3>
+          <button class="modal-close" (click)="closeEdit()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Title</label>
+              <input type="text" [value]="editForm().title"
+                (input)="updateForm('title', $any($event.target).value)" />
+            </div>
+            <div class="field">
+              <label>Director</label>
+              <input type="text" [value]="editForm().director"
+                (input)="updateForm('director', $any($event.target).value)" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea [value]="editForm().description" rows="3"
+              (input)="updateForm('description', $any($event.target).value)"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Price (₹/day)</label>
+              <input type="number" [value]="editForm().rentalPrice" min="1"
+                (input)="updateForm('rentalPrice', +$any($event.target).value)" />
+            </div>
+            <div class="field">
+              <label>Release Year</label>
+              <input type="number" [value]="editForm().releaseYear"
+                (input)="updateForm('releaseYear', +$any($event.target).value)" />
+            </div>
+            <div class="field">
+              <label>Rating (0–10)</label>
+              <input type="number" [value]="editForm().rating" min="0" max="10" step="0.1"
+                (input)="updateForm('rating', +$any($event.target).value)" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeEdit()">Cancel</button>
+          <button class="btn-save" [disabled]="isUpdating()" (click)="saveEdit()">
+            @if (isUpdating()) {
+              <span class="btn-spinner"></span> Saving...
+            } @else {
+              Save Changes
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

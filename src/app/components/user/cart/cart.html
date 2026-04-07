@@ -1,0 +1,244 @@
+<div class="page">
+  <app-navbar />
+
+  <!-- ── PAYMENT MODAL ─────────────────────────────────────── -->
+  @if (showPayModal()) {
+    <div class="pay-modal-backdrop" (click)="closePayModal()">
+      <div class="pay-modal-box" (click)="$event.stopPropagation()">
+
+        @if (!paymentSuccess()) {
+          <!-- Payment form -->
+          <div class="pay-modal-header">
+            <h3>Complete Payment</h3>
+            <button class="pay-modal-close" (click)="closePayModal()">✕</button>
+          </div>
+
+          <div class="pay-amount-row">
+            <span>Total Amount</span>
+            <strong class="pay-total">₹{{ totalAmount() }}</strong>
+          </div>
+
+          <p class="pay-section-label">Select Payment Method</p>
+          <div class="pay-methods">
+            <button class="pay-method-btn"
+              [class.selected]="selectedMethod() === 'upi'"
+              (click)="selectedMethod.set('upi')">
+              <span class="pay-method-icon">📱</span>
+              <span>UPI</span>
+            </button>
+            <button class="pay-method-btn"
+              [class.selected]="selectedMethod() === 'card'"
+              (click)="selectedMethod.set('card')">
+              <span class="pay-method-icon">💳</span>
+              <span>Card</span>
+            </button>
+            <button class="pay-method-btn"
+              [class.selected]="selectedMethod() === 'netbanking'"
+              (click)="selectedMethod.set('netbanking')">
+              <span class="pay-method-icon">🏦</span>
+              <span>Net Banking</span>
+            </button>
+          </div>
+
+          @if (selectedMethod() === 'upi') {
+            <div class="pay-input-wrap">
+              <label>UPI ID</label>
+              <input type="text" placeholder="yourname@upi" class="pay-input" />
+            </div>
+          }
+          @if (selectedMethod() === 'card') {
+            <div class="pay-input-wrap">
+              <label>Card Number</label>
+              <input type="text" placeholder="•••• •••• •••• ••••" class="pay-input" maxlength="19" />
+              <div class="pay-row-2">
+                <input type="text" placeholder="MM/YY" class="pay-input" />
+                <input type="text" placeholder="CVV" class="pay-input" maxlength="3" />
+              </div>
+            </div>
+          }
+          @if (selectedMethod() === 'netbanking') {
+            <div class="pay-input-wrap">
+              <label>Select Bank</label>
+              <select class="pay-input pay-select">
+                <option>State Bank of India</option>
+                <option>HDFC Bank</option>
+                <option>ICICI Bank</option>
+                <option>Axis Bank</option>
+                <option>Kotak Mahindra Bank</option>
+              </select>
+            </div>
+          }
+
+          <div class="pay-items-summary">
+            @for (item of cartService.cartItems(); track item.id) {
+              <div class="pay-item-row">
+                <span>{{ item.movieTitle }} ({{ item.durationDays }}d)</span>
+                <span>₹{{ item.rentalPrice * item.durationDays }}</span>
+              </div>
+            }
+          </div>
+
+          <button class="pay-confirm-btn"
+            [disabled]="isCheckingOut()"
+            (click)="confirmPayment()">
+            @if (isCheckingOut()) {
+              <span class="mini-spin white"></span> Processing…
+            } @else {
+              🔒 Pay ₹{{ totalAmount() }} Securely
+            }
+          </button>
+        } @else {
+          <!-- Payment success -->
+          <div class="pay-success-body">
+            <div class="pay-success-icon">✓</div>
+            <h3>Payment Successful!</h3>
+            <p class="pay-success-sub">Your rentals are now active</p>
+            <div class="pay-txn-box">
+              <span class="pay-txn-label">Transaction ID</span>
+              <span class="pay-txn-id">{{ payTxnId() }}</span>
+            </div>
+            <div class="pay-success-items">
+              @for (item of cartService.cartItems(); track item.id) {
+                <div class="pay-item-row">
+                  <span>{{ item.movieTitle }}</span>
+                  <span class="pay-item-active">Active</span>
+                </div>
+              }
+            </div>
+            <button class="pay-confirm-btn" (click)="goToRentals()">
+              ▶ Go to My Rentals
+            </button>
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+  <div class="cart-page">
+    <div class="cart-header">
+      <h1 class="cart-title">My Cart</h1>
+      <p class="cart-sub">{{ cartService.cartItems().length }} movie(s) ready to rent</p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="cart-loading">
+        <div class="cart-spinner"></div>
+        <p>Loading your cart...</p>
+      </div>
+    }
+
+    @if (!isLoading() && cartService.cartItems().length === 0) {
+      <div class="cart-empty">
+        <div class="empty-icon">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+        </div>
+        <h3>Your cart is empty</h3>
+        <p>Browse movies and add them to your cart</p>
+        <a routerLink="/home" class="browse-btn">Browse Movies</a>
+      </div>
+    }
+
+    @if (!isLoading() && cartService.cartItems().length > 0) {
+      <div class="cart-content">
+
+        <div class="cart-items">
+          @for (item of cartService.cartItems(); track item.id) {
+            <div class="cart-card">
+              <div class="cart-thumb">
+                @if (item.thumbnailUrl) {
+                  <img [src]="item.thumbnailUrl" [alt]="item.movieTitle"
+                    (error)="$any($event.target).src='assets/images/placeholders/movie-placeholder.svg'" />
+                } @else {
+                  <div class="thumb-fallback">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                      <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                    </svg>
+                  </div>
+                }
+              </div>
+
+              <div class="cart-info">
+                <h3 class="cart-movie-title">{{ item.movieTitle }}</h3>
+                <p class="cart-price-row">
+                  <span class="price-val">₹{{ item.rentalPrice }}</span>
+                  <span class="price-per">/day</span>
+                </p>
+                <div class="duration-row">
+                  <span class="dur-label">Duration:</span>
+                  <div class="dur-controls">
+                    <button class="dur-btn-sm" (click)="decreaseDuration(item)" [disabled]="item.durationDays <= 1">−</button>
+                    <span class="dur-val">{{ item.durationDays }} days</span>
+                    <button class="dur-btn-sm" (click)="increaseDuration(item)" [disabled]="item.durationDays >= 30">+</button>
+                  </div>
+                </div>
+                <p class="cart-subtotal">
+                  Subtotal: <strong>₹{{ item.rentalPrice * item.durationDays }}</strong>
+                </p>
+              </div>
+
+              <button class="remove-btn"
+                (click)="removeItem(item)"
+                [disabled]="removingId() === item.id"
+                title="Remove from cart">
+                @if (removingId() === item.id) {
+                  <span class="mini-spin"></span>
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="cart-summary">
+          <div class="summary-card">
+            <h3 class="summary-title">Order Summary</h3>
+
+            <div class="summary-rows">
+              @for (item of cartService.cartItems(); track item.id) {
+                <div class="summary-row">
+                  <span class="sum-name">{{ item.movieTitle }}</span>
+                  <span class="sum-val">₹{{ item.rentalPrice * item.durationDays }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-total">
+              <span>Total</span>
+              <strong>₹{{ totalAmount() }}</strong>
+            </div>
+
+            <div class="summary-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+              Rental starts immediately after checkout
+            </div>
+
+            <button class="checkout-btn" [disabled]="isCheckingOut()" (click)="openPayModal()">
+              @if (isCheckingOut()) {
+                <span class="mini-spin white"></span>
+                Processing...
+              } @else {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                </svg>
+                Checkout · ₹{{ totalAmount() }}
+              }
+            </button>
+
+            <button class="clear-btn" (click)="clearCart()">Clear Cart</button>
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,185 @@
+<div class="browse-page">
+
+  <app-browse-navbar
+    (openCategories)="showPanel.set(true)"
+    (search)="onSearch($event)" />
+
+  @if (showPanel()) {
+    <app-category-panel
+      [active]="activeCategory()"
+      (close)="showPanel.set(false)"
+      (select)="onCategorySelect($event)" />
+  }
+
+  <app-browse-toast />
+
+  <main class="browse-main">
+
+    <!-- ── SEARCH RESULTS ──────────────────────────────────────── -->
+    @if (isSearching()) {
+      <section class="filter-section">
+        <h2 class="filter-title">
+          Results for "{{ searchQuery() }}"
+          <span class="filter-count">{{ searchResults().length }}</span>
+        </h2>
+        @if (searchResults().length === 0) {
+          <div class="empty-state">
+            <p class="empty-title">No results found</p>
+            <p class="empty-sub">Try a different search term</p>
+          </div>
+        } @else {
+          <div class="filter-grid">
+            @for (m of searchResults(); track m.id) {
+              <ng-container *ngTemplateOutlet="filterCard; context: { $implicit: m }" />
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ── CATEGORY FILTER VIEW ────────────────────────────────── -->
+    @if (!isSearching() && activeCategory() && !isAzMode()) {
+      <section class="filter-section">
+        <div class="filter-header">
+          <h2 class="filter-title">
+            {{ categoryLabel() }}
+            <span class="filter-count">{{ categoryMovies().length }}</span>
+          </h2>
+          <button class="clear-cat" (click)="activeCategory.set('')">✕ Clear</button>
+        </div>
+        @if (categoryMovies().length === 0) {
+          <div class="empty-state">
+            <p class="empty-title">No movies available</p>
+            <p class="empty-sub">Check back later</p>
+          </div>
+        } @else {
+          <div class="filter-grid">
+            @for (m of visibleCategoryMovies(); track m.id) {
+              <ng-container *ngTemplateOutlet="filterCard; context: { $implicit: m }" />
+            }
+          </div>
+          @if (hasMore()) {
+            <div class="load-more-wrap">
+              @if (isLoadingMore()) {
+                <div class="load-more-spinner"></div>
+              } @else {
+                <button class="load-more-btn" (click)="loadMore()">Load More</button>
+              }
+            </div>
+          }
+        }
+      </section>
+    }
+
+    <!-- ── A–Z MODE ─────────────────────────────────────────────── -->
+    @if (isAzMode()) {
+      <div class="filter-header" style="padding: 1.5rem 3rem 0;">
+        <button class="clear-cat" (click)="activeCategory.set('')">← Back to Home</button>
+      </div>
+      <app-az-browser />
+    }
+
+    <!-- ── DEFAULT HOME ─────────────────────────────────────────── -->
+    @if (showDefault()) {
+
+      <!-- Hero -->
+      @if (heroMovie()) {
+        <div class="hero"
+          [style.background-image]="heroMovie()!.thumbnail ? 'url(' + heroMovie()!.thumbnail + ')' : 'none'">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-badges">
+              @if (heroMovie()!.topTen) {
+                <span class="hero-badge-top10">Top 10</span>
+              }
+              @for (g of heroMovie()!.genres.slice(0,2); track g) {
+                <span class="hero-badge-genre">{{ g }}</span>
+              }
+            </div>
+            <h1 class="hero-title">{{ heroMovie()!.title }}</h1>
+            <p class="hero-desc">{{ heroMovie()!.description }}</p>
+            <p class="hero-meta">{{ heroMovie()!.releaseYear }} · {{ heroMovie()!.language }} · ₹{{ heroMovie()!.pricePerDay }}/day</p>
+            <div class="hero-actions">
+              <button class="hero-btn-play">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Play
+              </button>
+              <button class="hero-btn-list" (click)="store.toggleMyList(heroMovie()!.id)">
+                {{ store.isInMyList(heroMovie()!.id) ? '✓ In My List' : '+ My List' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="rows-wrap">
+
+        <!-- Trending -->
+        @if (store.trending().length > 0) {
+          <app-movie-row title="🔥 Trending Now" badge="Hot" [movies]="store.trending()" />
+        }
+
+        <!-- Top 10 -->
+        @if (store.topTen().length > 0) {
+          <app-movie-row title="Top 10 in India" badge="Top 10" [movies]="store.topTen()" />
+        }
+
+        <!-- South Indian Cinema -->
+        @if (store.southIndian().length > 0) {
+          <app-movie-row title="South Indian Cinema" [movies]="store.southIndian()" />
+        }
+
+        <!--
+          Language rows — derived from ACTUAL movie data via computed signal.
+          When admin adds a movie with a new language, activeLanguages() updates
+          and Angular re-renders this @for block automatically.
+        -->
+        @for (lang of store.activeLanguages(); track lang) {
+          @if (store.moviesForLanguage(lang).length > 0) {
+            <app-movie-row
+              [title]="lang"
+              [movies]="store.moviesForLanguage(lang)" />
+          }
+        }
+
+        <!--
+          Genre rows — same reactive pattern.
+        -->
+        @for (genre of store.activeGenres(); track genre) {
+          @if (store.moviesForGenre(genre).length > 0) {
+            <app-movie-row
+              [title]="genre"
+              [movies]="store.moviesForGenre(genre)" />
+          }
+        }
+
+        <!-- A–Z Browser -->
+        <app-az-browser />
+
+      </div>
+    }
+
+  </main>
+
+  <!-- ── Filter card template ──────────────────────────────────── -->
+  <ng-template #filterCard let-m>
+    <div class="filter-card">
+      <img
+        [src]="m.thumbnail || store.placeholder"
+        [alt]="m.title"
+        class="fc-thumb"
+        (error)="$any($event.target).src = store.placeholder" />
+      <div class="fc-info">
+        <p class="fc-title">{{ m.title }}</p>
+        <p class="fc-meta">{{ m.releaseYear }} · {{ m.language }}</p>
+        <p class="fc-price">₹{{ m.pricePerDay }}/day</p>
+        <div class="fc-genres">
+          @for (g of m.genres.slice(0,2); track g) {
+            <span class="fc-genre">{{ g }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+</div>

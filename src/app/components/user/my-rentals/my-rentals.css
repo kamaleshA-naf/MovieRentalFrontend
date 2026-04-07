@@ -1,0 +1,380 @@
+.page { min-height: 100vh; background: var(--bg); transition: background 0.3s; }
+
+/* ── Refund modal ────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.refund-modal {
+  background: var(--bg-2, #1c1c1e);
+  border: 1px solid var(--border-md, rgba(255,255,255,0.12));
+  border-radius: 18px; width: 100%; max-width: 420px;
+  overflow: hidden; animation: slideUp 0.25s ease;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.refund-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.07));
+}
+.refund-header h3 { font-size: 1.05rem; font-weight: 700; color: var(--txt); margin: 0 0 0.2rem; }
+.refund-movie { font-size: 0.85rem; color: var(--txt-3); margin: 0; }
+
+.refund-body { padding: 1.1rem 1.5rem; }
+.refund-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.55rem 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.05));
+  font-size: 0.88rem; color: var(--txt-2);
+}
+.refund-row:last-of-type { border-bottom: none; }
+.refund-row.highlight { background: rgba(48,209,88,0.05); border-radius: 8px; padding: 0.65rem 0.5rem; margin: 0.25rem -0.5rem; }
+.refund-pct { color: #30d158; font-size: 1rem; font-weight: 700; }
+.refund-amt { color: #30d158; font-size: 1.1rem; font-weight: 800; }
+.refund-policy {
+  font-size: 0.72rem; color: var(--txt-3);
+  margin-top: 0.75rem; line-height: 1.5;
+  background: var(--bg-glass, rgba(255,255,255,0.03));
+  border-radius: 8px; padding: 0.6rem 0.75rem;
+}
+
+.refund-actions {
+  display: flex; gap: 0.65rem;
+  padding: 0.85rem 1.5rem 1.25rem;
+}
+.btn-cancel-refund {
+  flex: 1; background: var(--bg-glass, rgba(255,255,255,0.06));
+  border: 1px solid var(--border); color: var(--txt-2);
+  border-radius: 10px; padding: 0.75rem;
+  font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.18s;
+}
+.btn-cancel-refund:hover { background: var(--bg-3); color: var(--txt); }
+.btn-confirm-refund {
+  flex: 2; background: #e50914; border: none; color: #fff;
+  border-radius: 10px; padding: 0.75rem;
+  font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  transition: all 0.18s;
+}
+.btn-confirm-refund:hover:not(:disabled) { background: #c40812; }
+.btn-confirm-refund:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Refund success */
+.refund-success {
+  padding: 2rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 0.75rem;
+}
+.success-check {
+  width: 56px; height: 56px;
+  background: rgba(48,209,88,0.15);
+  border: 2px solid #30d158;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: #30d158; font-weight: 700;
+}
+.refund-success h3 { font-size: 1.1rem; font-weight: 700; color: var(--txt); margin: 0; }
+.txn-id { font-size: 0.82rem; color: var(--txt-2); margin: 0; }
+.txn-id strong { color: #0a84ff; font-family: monospace; }
+.refund-credit { font-size: 0.82rem; color: var(--txt-3); max-width: 280px; line-height: 1.5; margin: 0; }
+.refund-success .btn-confirm-refund { width: 100%; margin-top: 0.5rem; background: #0a84ff; }
+.refund-success .btn-confirm-refund:hover { background: #1a8fff; }
+
+/* Light mode */
+body.light .refund-modal { background: #ffffff; border-color: rgba(0,0,0,0.1); }
+body.light .refund-header { border-bottom-color: rgba(0,0,0,0.07); }
+body.light .refund-row { border-bottom-color: rgba(0,0,0,0.06); }
+body.light .refund-policy { background: rgba(0,0,0,0.03); }
+
+.rentals-content {
+  max-width: 900px; margin: 0 auto;
+  padding: 5rem 1.5rem 4rem;
+}
+
+/* Header */
+.page-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 1.5rem;
+}
+.page-title {
+  font-size: 1.8rem; font-weight: 900;
+  color: var(--txt); margin-bottom: 0.2rem;
+}
+.page-sub { color: var(--txt-3); font-size: 0.88rem; }
+
+/* Filter tabs */
+.filter-tabs {
+  display: flex; gap: 0.5rem;
+  margin-bottom: 2rem; flex-wrap: wrap;
+}
+.tab {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--txt-3);
+  border-radius: 10px; padding: 0.5rem 1rem;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+}
+.tab:hover { background: var(--bg-3); color: var(--txt); }
+.tab.active {
+  background: rgba(10,132,255,0.15);
+  border-color: rgba(10,132,255,0.35);
+  color: #0a84ff;
+}
+.tab-count {
+  background: var(--bg-glass);
+  border-radius: 5px; padding: 0.08rem 0.45rem;
+  font-size: 0.72rem;
+}
+.active-count { background: rgba(10,132,255,0.2); }
+
+/* Loading */
+.loading-state {
+  display: flex; align-items: center; gap: 0.75rem;
+  color: var(--txt-3); padding: 4rem 0;
+  font-size: 0.9rem;
+}
+.spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid var(--border);
+  border-top-color: #0a84ff;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty */
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  padding: 5rem 2rem;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state h3 {
+  font-size: 1.2rem; font-weight: 800;
+  color: var(--txt); margin-bottom: 0.4rem;
+}
+.empty-state p {
+  color: var(--txt-3); font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+.browse-btn {
+  background: #0a84ff; color: #fff; border: none;
+  border-radius: 10px; padding: 0.8rem 2rem;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: background 0.2s;
+}
+.browse-btn:hover { background: #1a8fff; }
+
+/* Grid */
+.rentals-grid {
+  display: flex; flex-direction: column; gap: 1rem;
+}
+
+/* Card */
+.rental-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.25rem 1.5rem;
+  transition: border-color 0.2s, background 0.3s;
+}
+.rental-card:hover { border-color: var(--border-md); }
+
+.card-active  { border-left: 3px solid #30d158; }
+.card-expired { border-left: 3px solid #ff9f0a; }
+.card-returned { border-left: 3px solid var(--border-md); }
+
+/* Card top */
+.card-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 0.75rem;
+}
+.movie-info { display: flex; flex-direction: column; gap: 0.35rem; }
+.movie-title {
+  font-size: 1rem; font-weight: 700; color: var(--txt);
+}
+
+/* Status pill */
+.status-pill {
+  display: inline-block; padding: 0.18rem 0.65rem;
+  border-radius: 5px; font-size: 0.7rem; font-weight: 700;
+}
+.pill-active {
+  background: rgba(48,209,88,0.12);
+  color: #30d158; border: 1px solid rgba(48,209,88,0.25);
+}
+.pill-expired {
+  background: rgba(255,159,10,0.12);
+  color: #ff9f0a; border: 1px solid rgba(255,159,10,0.25);
+}
+.pill-returned {
+  background: var(--bg-glass);
+  color: var(--txt-3);
+  border: 1px solid var(--border);
+}
+
+/* Days remaining */
+.days-info {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 0.1rem;
+}
+.days-num {
+  font-size: 1.6rem; font-weight: 900; color: var(--txt);
+  line-height: 1;
+}
+.days-label {
+  font-size: 0.68rem; color: var(--txt-3);
+}
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 0.85rem; }
+.progress-bar {
+  height: 4px; background: var(--border);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: #30d158;
+  border-radius: 2px; transition: width 0.3s ease;
+}
+
+/* Dates */
+.date-row {
+  display: flex; gap: 2rem; margin-bottom: 1rem;
+}
+.date-item { display: flex; flex-direction: column; gap: 0.15rem; }
+.date-label {
+  font-size: 0.68rem; font-weight: 600;
+  color: var(--txt-3); text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.date-val { font-size: 0.85rem; color: var(--txt-2); }
+
+/* Actions */
+.card-actions {
+  display: flex; gap: 0.65rem; padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.btn-watch {
+  background: #0a84ff; color: #fff; border: none;
+  border-radius: 8px; padding: 0.55rem 1.25rem;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-watch:hover { background: #1a8fff; }
+
+.btn-return {
+  background: rgba(255,55,95,0.08);
+  border: 1px solid rgba(255,55,95,0.2);
+  color: #ff375f; border-radius: 8px;
+  padding: 0.55rem 1rem; font-size: 0.82rem;
+  font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 0.35rem;
+  transition: background 0.2s;
+}
+.btn-return:hover:not(:disabled) { background: rgba(255,55,95,0.15); }
+.btn-return:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-detail {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--txt-2);
+  border-radius: 8px; padding: 0.55rem 1rem;
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-detail:hover { background: var(--bg-3); }
+
+.btn-rent-again {
+  background: rgba(10,132,255,0.1);
+  border: 1px solid rgba(10,132,255,0.25);
+  color: #0a84ff; border-radius: 8px;
+  padding: 0.55rem 1rem; font-size: 0.82rem;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-rent-again:hover { background: rgba(10,132,255,0.2); }
+
+.mini-spin {
+  display: inline-block; width: 12px; height: 12px;
+  border: 1.5px solid rgba(255,55,95,0.3);
+  border-top-color: #ff375f;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+
+@media (max-width: 600px) {
+  .card-top { flex-direction: column; gap: 0.5rem; }
+  .days-info { align-items: flex-start; flex-direction: row; gap: 0.35rem; align-items: center; }
+  .date-row { gap: 1rem; }
+}
+
+/* ── Deleted/unavailable movie badge ────────────────────────── */
+.badge-unavailable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 55, 95, 0.1);
+  border: 1px solid rgba(255, 55, 95, 0.25);
+  color: #ff375f;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ── Renew button ────────────────────────────────────────── */
+.btn-renew {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(48, 209, 88, 0.12);
+  border: 1px solid rgba(48, 209, 88, 0.3);
+  color: #30d158;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-renew:hover:not(:disabled) {
+  background: rgba(48, 209, 88, 0.22);
+  transform: translateY(-1px);
+}
+.btn-renew:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-renew.renewing { opacity: 0.7; }
+
+.mini-spin-green {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 1.5px solid rgba(48, 209, 88, 0.3);
+  border-top-color: #30d158;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Unavailable movie state ─────────────────────────────── */
+.unavailable-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.unavail-text {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Rental expired message ──────────────────────────────── */
+.rental-expired-msg {
+  font-size: 0.8rem;
+  color: #ff6b6b;
+  margin: 0 0 0.4rem;
+  font-style: italic;
+}

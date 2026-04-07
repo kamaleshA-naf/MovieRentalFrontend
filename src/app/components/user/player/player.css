@@ -1,0 +1,351 @@
+/* ── Page shell ──────────────────────────────────────────────── */
+.player-page {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* ── Loading / access-denied centred card ────────────────────── */
+.player-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(245, 245, 247, 0.45);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.lock-icon {
+  color: rgba(245, 245, 247, 0.25);
+  margin-bottom: 0.5rem;
+}
+
+.deny-title {
+  color: rgba(245, 245, 247, 0.8);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.deny-sub {
+  color: rgba(245, 245, 247, 0.4);
+  font-size: 0.85rem;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────── */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2.5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #0a84ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Player wrapper ──────────────────────────────────────────── */
+.player-wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+}
+
+/* ── HTML5 video element ─────────────────────────────────────── */
+.video-el {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+/* ── YouTube iframe ──────────────────────────────────────────── */
+.youtube-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── YouTube top bar overlay ─────────────────────────────────── */
+.yt-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.yt-topbar .ctrl-back {
+  pointer-events: all;
+}
+
+/* ── No-video / error fallback ───────────────────────────────── */
+.no-video {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  background: #060606;
+  padding: 2rem;
+  text-align: center;
+}
+
+.no-video-title {
+  color: rgba(245, 245, 247, 0.65);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.no-video-sub {
+  color: rgba(245, 245, 247, 0.3);
+  font-size: 0.82rem;
+  max-width: 360px;
+}
+
+.btn-back-center {
+  margin-top: 0.5rem;
+}
+
+/* ── Controls overlay ────────────────────────────────────────── */
+.controls-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, transparent 22%),
+    linear-gradient(to top,   rgba(0,0,0,0.88) 0%, transparent 38%);
+  pointer-events: none;
+}
+
+.controls-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────── */
+.ctrl-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+}
+
+.ctrl-back {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.ctrl-back:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.ctrl-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.ctrl-movie-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.ctrl-movie-year {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.1rem 0 0;
+}
+
+/* ── Center play button ──────────────────────────────────────── */
+.ctrl-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-btn-center {
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.play-btn-center:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+/* ── Bottom bar ──────────────────────────────────────────────── */
+.ctrl-bottom {
+  padding: 1rem 2rem 1.75rem;
+}
+
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.time-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  white-space: nowrap;
+}
+
+.progress-bar {
+  flex: 1;
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.progress-buffered {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width 0.3s ease;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #0a84ff;
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width 0.1s linear;
+}
+
+.progress-input {
+  position: absolute;
+  inset: -8px 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  height: 20px;
+}
+
+/* ── Buffering spinner overlay ───────────────────────────────── */
+.buffering-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.buffering-spinner {
+  width: 52px;
+  height: 52px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ── Control buttons row ─────────────────────────────────────── */
+.ctrl-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ctrl-btn {
+  width: 38px;
+  height: 38px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.volume-wrap {
+  display: flex;
+  align-items: center;
+  width: 80px;
+}
+
+.volume-input {
+  width: 100%;
+  accent-color: #0a84ff;
+  cursor: pointer;
+}
+
+.ctrl-spacer {
+  flex: 1;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .volume-wrap  { display: none; }
+  .ctrl-top     { padding: 1rem; }
+  .ctrl-bottom  { padding: 0.75rem 1rem 1.25rem; }
+  .play-btn-center { width: 56px; height: 56px; }
+}

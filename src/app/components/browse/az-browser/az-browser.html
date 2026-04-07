@@ -1,0 +1,41 @@
+<section class="az-section">
+  <h2 class="az-title">Browse by Alphabet</h2>
+
+  <div class="az-letters">
+    @for (l of alphabet; track l) {
+      <button
+        class="letter-btn"
+        [class.active]="selected() === l"
+        [class.has-movies]="hasMovies(l)"
+        (click)="select(l)">
+        {{ l }}
+      </button>
+    }
+    <button
+      class="letter-btn clear-btn"
+      [class.active]="selected() === ''"
+      (click)="select('')">
+      All
+    </button>
+  </div>
+
+  @if (selected()) {
+    <div class="az-results">
+      @if (results().length === 0) {
+        <div class="az-empty">
+          <p class="az-empty-title">No movies found for "{{ selected() }}"</p>
+          <p class="az-empty-sub">Try another letter</p>
+        </div>
+      } @else {
+        <p class="az-count">
+          {{ results().length }} movie{{ results().length !== 1 ? 's' : '' }} starting with "{{ selected() }}"
+        </p>
+        <div class="az-grid">
+          @for (m of results(); track m.id) {
+            <app-browse-card [movie]="m" />
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

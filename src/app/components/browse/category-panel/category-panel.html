@@ -1,0 +1,45 @@
+<div class="backdrop" (click)="close.emit()"></div>
+
+<div class="panel">
+  <div class="panel-handle"></div>
+  <h3 class="panel-title">Browse</h3>
+
+  <!-- Fixed categories -->
+  <div class="panel-section">
+    @for (cat of fixedCategories; track cat.key) {
+      <button class="cat-item"
+        [class.active]="active() === cat.key"
+        (click)="select.emit(cat.key)">
+        {{ cat.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Languages — reactive from store -->
+  @if (store.languages().length > 0) {
+    <p class="panel-label">Languages</p>
+    <div class="panel-section">
+      @for (lang of store.languages(); track lang) {
+        <button class="cat-item"
+          [class.active]="active() === 'lang:' + lang"
+          (click)="select.emit('lang:' + lang)">
+          {{ lang }}
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Genres — reactive from store -->
+  @if (store.genres().length > 0) {
+    <p class="panel-label">Genres</p>
+    <div class="panel-section">
+      @for (g of store.genres(); track g) {
+        <button class="cat-item"
+          [class.active]="active() === 'genre:' + g"
+          (click)="select.emit('genre:' + g)">
+          {{ g }}
+        </button>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,197 @@
+<div class="page">
+  <app-navbar />
+
+  <div class="content">
+
+    <!-- Profile hero -->
+    <div class="profile-hero-pad"></div>
+    <div class="profile-header">
+      <div class="avatar-wrap">
+        <div class="avatar">
+          {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
+        </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="greeting">{{ auth.currentUser()?.userName }}</h1>
+        <span class="profile-email">{{ auth.currentUser()?.role }}</span>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-box">
+        <p class="stat-num">{{ rentalService.myRentals().length }}</p>
+        <p class="stat-lbl">Total Rentals</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-num">{{ activeRentals().length }}</p>
+        <p class="stat-lbl">Active Now</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-num">{{ wishlistService.wishlist().length }}</p>
+        <p class="stat-lbl">Wishlist</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab"
+        [class.active]="activeTab() === 'overview'"
+        (click)="activeTab.set('overview')">
+        Overview
+      </button>
+      <button class="tab"
+        [class.active]="activeTab() === 'rentals'"
+        (click)="activeTab.set('rentals')">
+        Rentals
+      </button>
+      <button class="tab"
+        [class.active]="activeTab() === 'wishlist'"
+        (click)="activeTab.set('wishlist')">
+        Wishlist
+      </button>
+      <button class="tab"
+        [class.active]="activeTab() === 'transactions'"
+        (click)="activeTab.set('transactions')">
+        Transactions
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-wrap">
+        <div class="loading-spinner"></div>
+      </div>
+    }
+
+    @if (!isLoading()) {
+
+      <!-- OVERVIEW -->
+      @if (activeTab() === 'overview') {
+
+        <!-- Active rentals -->
+        @if (activeRentals().length > 0) {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>Currently Watching</h3>
+              <span class="count-tag">{{ activeRentals().length }}</span>
+            </div>
+            @for (rental of activeRentals(); track rental.id) {
+              <div class="rental-row">
+                <div class="rental-info">
+                  <p class="rental-movie">{{ rental.movieTitle }}</p>
+                  <p class="rental-meta">Expires {{ formatDate(rental.expiryDate) }}</p>
+                  <div class="days-row">
+                    <div class="days-track">
+                      <div class="days-fill" [style.width]="(daysRemaining(rental.expiryDate) / 30 * 100) + '%'"></div>
+                    </div>
+                    <span class="days-txt">{{ daysRemaining(rental.expiryDate) }}d left</span>
+                  </div>
+                </div>
+                <button class="watch-btn" (click)="watchMovie(rental.movieId)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  Watch
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="section-card">
+            <div class="sc-head"><h3>Currently Watching</h3></div>
+            <div class="empty-mini">No active rentals. Browse movies to get started.</div>
+          </div>
+        }
+
+        <!-- Expired rentals -->
+        @if (expiredRentals().length > 0) {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>Expired Rentals</h3>
+              <span class="count-tag expired-tag">{{ expiredRentals().length }}</span>
+            </div>
+            @for (rental of expiredRentals(); track rental.id) {
+              <div class="rental-row expired-row">
+                <div class="rental-info">
+                  <p class="rental-movie expired-title">{{ rental.movieTitle }}</p>
+                  <p class="rental-meta">Expired {{ formatDate(rental.expiryDate) }}</p>
+                </div>
+                <div class="rental-right">
+                  <span class="expired-badge">Expired</span>
+                  <button class="renew-btn-sm" (click)="viewMovie(rental.movieId)">Renew</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (wishlistService.wishlist().length > 0) {
+          <div class="section-card">
+            <div class="sc-head">
+              <h3>My Wishlist</h3>
+              <button class="link-btn" (click)="activeTab.set('wishlist')">View all</button>
+            </div>
+            @for (item of wishlistService.wishlist().slice(0,3); track item.id) {
+              <div class="wishlist-row">
+                <div class="wl-info">
+                  <p class="wl-title">{{ item.movieTitle }}</p>
+                  <p class="wl-meta">₹{{ item.rentalPrice }}/day · Added {{ formatDate(item.addedDate) }}</p>
+                </div>
+                <button class="rent-btn" (click)="viewMovie(item.movieId)">Rent</button>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- RENTALS -->
+      @if (activeTab() === 'rentals') {
+        <app-carousel
+          title="All Rentals"
+          [items]="rentalsToCarousel()"
+          [pageSize]="20"
+          [loading]="isLoading()"
+          (itemClick)="onRentalCarouselClick($event)" />
+      }
+
+      <!-- WISHLIST -->
+      @if (activeTab() === 'wishlist') {
+        <app-carousel
+          title="My Wishlist"
+          badge="Saved"
+          badgeClass="carousel-badge-red"
+          [items]="wishlistToCarousel()"
+          [pageSize]="20"
+          [loading]="isLoading()"
+          (itemClick)="onWishlistCarouselClick($event)" />
+      }
+
+      <!-- TRANSACTIONS -->
+      @if (activeTab() === 'transactions') {
+        <div class="section-card">
+          <div class="sc-head">
+            <h3>Transactions</h3>
+            <span class="count-tag">{{ transactions().length }}</span>
+          </div>
+          @if (transactions().length === 0) {
+            <div class="empty-mini">No transactions yet.</div>
+          }
+          @for (txn of transactions(); track txn.txnId) {
+            <div class="txn-row">
+              <div class="txn-info">
+                <p class="txn-id-txt">{{ txn.txnId }}</p>
+                <p class="txn-movie">{{ txn.movieTitle }}</p>
+                <p class="txn-date">{{ formatDate(txn.date) }} → {{ formatDate(txn.expiryDate) }}</p>
+              </div>
+              <div class="txn-right">
+                <span class="txn-amount">₹{{ txn.amount }}</span>
+                <span class="txn-status" [class.txn-refunded]="txn.status === 'Refunded'" [class.txn-completed]="txn.status === 'Completed'">
+                  {{ txn.status }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </div>
+</div>

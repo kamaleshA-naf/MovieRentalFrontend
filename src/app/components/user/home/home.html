@@ -1,0 +1,329 @@
+<div class="page">
+  <app-navbar />
+
+  <!-- ── HERO ──────────────────────────────────────────────── -->
+  @if (featuredMovie()) {
+    <section class="hero">
+      @if (featuredMovie()!.thumbnailUrl) {
+        <div class="hero-bg" [style.background-image]="heroBg()"></div>
+      } @else {
+        <div class="hero-bg hero-bg-empty"></div>
+      }
+      <div class="hero-vignette"></div>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="badge-featured">Featured</span>
+          @for (g of featuredMovie()!.genres.slice(0,2); track g.id) {
+            <span class="badge-genre">{{ g.name }}</span>
+          }
+        </div>
+        <h1 class="hero-title">{{ featuredMovie()!.title }}</h1>
+        <p class="hero-desc">{{ featuredMovie()!.description }}</p>
+        <div class="hero-meta">
+          <span>{{ featuredMovie()!.releaseYear }}</span>
+          <span>{{ featuredMovie()!.director }}</span>
+        </div>
+        <div class="hero-actions">
+          @if (hasAccess(featuredMovie()!.id)) {
+            <a [routerLink]="['/watch', featuredMovie()!.id]" class="btn-watch">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Watch Now
+            </a>
+          } @else {
+            <a [routerLink]="['/movie', featuredMovie()!.id]" class="btn-rent">
+              Rent ₹{{ featuredMovie()!.rentalPrice }}
+            </a>
+          }
+          <a [routerLink]="['/movie', featuredMovie()!.id]" class="btn-info">More Info</a>
+        </div>
+      </div>
+      <div class="hero-fade"></div>
+    </section>
+  }
+
+  <div class="content">
+
+    <div class="greeting-bar">
+      <p class="greeting-hi">{{ greeting() }}</p>
+      <p class="greeting-sub">What would you like to watch today?</p>
+    </div>
+
+    <!-- ── SEARCH PANEL ──────────────────────────────────── -->
+    @if (searchPanelOpen()) {
+      <!-- Backdrop -->
+      <div class="search-backdrop" (click)="closeSearchPanel()"></div>
+
+      <div class="search-panel">
+        <div class="sp-header">
+          <div class="search-wrap" [class.searching]="isSearching()">
+            <svg class="s-ico" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input
+              #searchInput
+              type="text"
+              placeholder="Search movies, directors, genres..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchInput($event)"
+              autofocus />
+            @if (isSearching()) { <span class="search-spinner"></span> }
+            @if (searchQuery()) {
+              <button class="s-clear" (click)="clearSearch()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            }
+          </div>
+          <button class="sp-close" (click)="closeSearchPanel()">✕ Close</button>
+        </div>
+
+        <!-- Genre filter -->
+        <div class="sp-section">
+          <p class="sp-label">Genres</p>
+          <div class="genre-pills">
+            @for (g of genres(); track g) {
+              <button class="pill" [class.active]="selectedGenre() === g"
+                (click)="selectedGenre.set(g); selectedLetter.set('')">{{ g }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Language filter -->
+        @if (activeLanguages().length > 0) {
+          <div class="sp-section">
+            <p class="sp-label">Languages</p>
+            <div class="genre-pills">
+              @for (l of activeLanguages(); track l) {
+                <button class="pill"
+                  [class.active]="selectedLanguage() === l"
+                  (click)="selectLanguage(l)">{{ l }}</button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- A-Z filter -->
+        <div class="sp-section">
+          <p class="sp-label">Browse A–Z</p>
+          <div class="az-bar" style="margin:0;border:none;padding:0;background:none;">
+            @for (l of alphabet; track l) {
+              <button class="az-btn"
+                [class.active]="selectedLetter() === l"
+                [class.has-movies]="hasMoviesForLetter(l)"
+                (click)="selectLetter(l)">{{ l }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Results count + inline results -->
+        @if (isFilterMode()) {
+          <div class="sp-results-bar">
+            <span>{{ filteredMovies().length }} movies found</span>
+            <button class="sp-clear-all" (click)="clearSearch(); selectedGenre.set('All')">Clear all</button>
+          </div>
+
+          <!-- Results rendered INSIDE the panel so they appear above backdrop -->
+          @if (filteredMovies().length === 0) {
+            <div class="sp-no-results">
+              <p>No movies found — try a different search</p>
+            </div>
+          } @else {
+            <div class="sp-results-grid">
+              @for (movie of filteredMovies().slice(0, 20); track trackById($index, movie)) {
+                <div class="sp-movie-card" [routerLink]="['/movie', movie.id]" (click)="closeSearchPanel()">
+                  <div class="sp-thumb">
+                    <img [src]="posterUrl(movie)" [alt]="movie.title" loading="lazy"
+                      (error)="$any($event.target).src = PLACEHOLDER" />
+                  </div>
+                  <p class="sp-title">{{ movie.title }}</p>
+                  <p class="sp-meta">{{ movie.releaseYear }}</p>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- ── SEARCH TRIGGER BAR (collapsed) ────────────────── -->
+    @if (!searchPanelOpen()) {
+      <div class="toolbar">
+        <div class="search-wrap search-trigger" (click)="openSearchPanel()">
+          <svg class="s-ico" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <span class="search-placeholder">Search movies, directors, genres...</span>
+          <span class="search-hint-chips">
+            @for (g of genres().slice(1,4); track g) {
+              <span class="hint-chip">{{ g }}</span>
+            }
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- ── LOADING ────────────────────────────────────────── -->
+    @if (movieService.isLoading()) {
+      <div class="skeleton-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="skeleton-card">
+            <div class="skeleton-thumb"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!movieService.isLoading() && allMovies().length === 0 && !searchQuery()) {
+      <div class="empty-catalog">
+        <p class="empty-catalog-title">No movies yet</p>
+        <p class="empty-catalog-sub">Movies added by the Admin will appear here.</p>
+      </div>
+    }
+
+    <!-- ── FILTER / SEARCH / A-Z RESULTS ─────────────────── -->
+    @if (!movieService.isLoading() && isFilterMode()) {
+      <div class="section">
+        <div class="sec-head">
+          <h2>
+            @if (selectedLetter()) { Movies starting with "{{ selectedLetter() }}" }
+            @else if (debouncedSearch()) { Results for "{{ debouncedSearch() }}" }
+            @else { {{ selectedGenre() }} }
+          </h2>
+          <span class="result-count">{{ filteredMovies().length }} movies</span>
+          <button class="see-all" (click)="clearSearch(); selectedGenre.set('All')">Clear</button>
+        </div>
+
+        @if (filteredMovies().length === 0) {
+          <div class="no-results">
+            <p class="no-results-title">No movies found</p>
+            <p class="no-results-sub">
+              @if (selectedLetter()) { No movies starting with "{{ selectedLetter() }}" }
+              @else if (debouncedSearch()) { Try a different search term }
+              @else { No movies in this category yet }
+            </p>
+            <button class="clear-filters-btn" (click)="clearSearch(); selectedGenre.set('All')">
+              Clear Filters
+            </button>
+          </div>
+        } @else {
+          <app-carousel
+            [title]="selectedLetter() ? 'Movies — ' + selectedLetter() : debouncedSearch() ? 'Results for &quot;' + debouncedSearch() + '&quot;' : selectedGenre()"
+            [items]="toCarouselItems(filteredMovies())"
+            [cartItems]="cartItemsMap()"
+            [pageSize]="20"
+            [loading]="isLoadingMore()"
+            (itemClick)="onCarouselClick($event)"
+            (cartClick)="onCarouselCartClick($event)" />
+          <!-- Infinite scroll sentinel -->
+          <div id="scroll-sentinel" class="scroll-sentinel"></div>
+          @if (isLoadingMore()) {
+            <div class="load-more-spinner">
+              <span class="mini-spin-lg"></span>
+              <span>Loading more...</span>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- ── DEFAULT HOME SECTIONS ─────────────────────────── -->
+    @if (!movieService.isLoading() && !isFilterMode() && allMovies().length > 0) {
+
+      @if (trendingMovies().length > 0) {
+        <app-carousel
+          title="Trending Now"
+          badge="This Week"
+          [items]="toCarouselItems(initRow('trending', trendingMovies()))"
+          [cartItems]="cartItemsMap()"
+          [loading]="movieService.isLoading()"
+          (loadMore)="onCarouselLoadMore('trending')"
+          (itemClick)="onCarouselClick($event)"
+          (cartClick)="onCarouselCartClick($event)" />
+      }
+
+      @if (mostLovedMovies().length > 0) {
+        <app-carousel
+          title="Most Loved"
+          badge="Fan Favourites"
+          badgeClass="carousel-badge-red"
+          [items]="toCarouselItems(initRow('loved', mostLovedMovies()))"
+          [cartItems]="cartItemsMap()"
+          [loading]="movieService.isLoading()"
+          (loadMore)="onCarouselLoadMore('loved')"
+          (itemClick)="onCarouselClick($event)"
+          (cartClick)="onCarouselCartClick($event)" />
+      }
+
+      @if (top10Movies().length > 0) {
+        <app-carousel
+          title="Top 10 in India"
+          badge="Top Rated"
+          badgeClass="carousel-badge-gold"
+          [items]="toCarouselItems(initRow('top10', top10Movies()))"
+          [cartItems]="cartItemsMap()"
+          [loading]="movieService.isLoading()"
+          (loadMore)="onCarouselLoadMore('top10')"
+          (itemClick)="onCarouselClick($event)"
+          (cartClick)="onCarouselCartClick($event)" />
+      }
+
+      @if (newMovies().length > 0) {
+        <app-carousel
+          title="New Releases"
+          badge="Latest"
+          badgeClass="carousel-badge-green"
+          [items]="toCarouselItems(initRow('new', newMovies()))"
+          [cartItems]="cartItemsMap()"
+          [loading]="movieService.isLoading()"
+          (loadMore)="onCarouselLoadMore('new')"
+          (itemClick)="onCarouselClick($event)"
+          (cartClick)="onCarouselCartClick($event)" />
+      }
+
+      @if (southIndianMovies().length > 0) {
+        <app-carousel
+          title="South Indian Cinema"
+          badge="Tamil · Telugu · Malayalam · Kannada"
+          badgeClass="carousel-badge-purple"
+          [items]="toCarouselItems(initRow('south', southIndianMovies()))"
+          [cartItems]="cartItemsMap()"
+          [loading]="movieService.isLoading()"
+          (loadMore)="onCarouselLoadMore('south')"
+          (itemClick)="onCarouselClick($event)"
+          (cartClick)="onCarouselCartClick($event)" />
+      }
+
+      @for (lang of activeLanguages(); track lang) {
+        @if (moviesForLanguage(lang).length > 0) {
+          <app-carousel
+            [title]="lang"
+            [items]="toCarouselItems(initRow('lang-' + lang, moviesForLanguage(lang)))"
+            [cartItems]="cartItemsMap()"
+            [loading]="movieService.isLoading()"
+            (loadMore)="onCarouselLoadMore('lang-' + lang)"
+            (itemClick)="onCarouselClick($event)"
+            (cartClick)="onCarouselCartClick($event)" />
+        }
+      }
+
+      @for (genre of activeGenres(); track genre) {
+        @if (moviesForGenre(genre).length > 0) {
+          <app-carousel
+            [title]="genre"
+            [items]="toCarouselItems(initRow('genre-' + genre, moviesForGenre(genre)))"
+            [cartItems]="cartItemsMap()"
+            [loading]="movieService.isLoading()"
+            (loadMore)="onCarouselLoadMore('genre-' + genre)"
+            (itemClick)="onCarouselClick($event)"
+            (cartClick)="onCarouselCartClick($event)" />
+        }
+      }
+
+    }
+  </div>
+</div>
+
+

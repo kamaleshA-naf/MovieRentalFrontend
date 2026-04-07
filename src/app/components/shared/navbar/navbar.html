@@ -1,0 +1,179 @@
+<nav class="nav">
+  <div class="nav-inner">
+
+    <!-- Brand -->
+    <a routerLink="/home" class="nav-brand">
+      <div class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <polygon points="10,8 10,16 17,12"/>
+        </svg>
+      </div>
+      <span class="brand-name">MovieBox</span>
+    </a>
+
+    <!-- Desktop links -->
+    <div class="nav-links">
+      <a routerLink="/home"       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
+      <a routerLink="/my-rentals" routerLinkActive="active">My Rentals</a>
+      <a routerLink="/wishlist"   routerLinkActive="active">Wishlist</a>
+      <a routerLink="/profile"    routerLinkActive="active">Profile</a>
+    </div>
+
+    <!-- Right controls -->
+    <div class="nav-right">
+
+      <!-- Notifications -->
+      <!-- <div class="notif-wrap">
+        <button class="icon-btn" (click)="notifOpen.update(v => !v)" [class.active]="notifOpen()" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+          </svg>
+          @if (notificationSvc.unreadCount() > 0) {
+            <span class="badge">{{ notificationSvc.unreadCount() > 9 ? '9+' : notificationSvc.unreadCount() }}</span>
+          }
+        </button>
+
+        @if (notifOpen()) {
+          <div class="notif-panel">
+            <div class="notif-header">
+              <h3>Notifications</h3>
+              @if (notificationSvc.unreadCount() > 0) {
+                <button class="mark-all-btn" (click)="markAllRead()">Mark all read</button>
+              }
+            </div>
+            <div class="notif-list">
+              @if (notificationSvc.notifications().length === 0) {
+                <div class="notif-empty"><p>No notifications</p></div>
+              }
+              @for (n of notificationSvc.notifications(); track n.id) {
+                <div class="notif-item" [class.unread]="!n.isRead" (click)="markRead(n.id)">
+                  <div class="notif-body">
+                    <p class="notif-title">{{ n.title }}</p>
+                    <p class="notif-msg">{{ n.message }}</p>
+                    <p class="notif-time">{{ timeAgo(n.createdAt) }}</p>
+                  </div>
+                  @if (!n.isRead) { <div class="unread-dot"></div> }
+                </div>
+              }
+            </div>
+          </div>
+          <div class="overlay-backdrop" (click)="notifOpen.set(false)"></div>
+        }
+      </div> -->
+
+      <!-- Cart -->
+      <a routerLink="/cart" class="icon-btn cart-btn" title="Cart">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.9 18 9 18h12v-2H9.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 23.46 5H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        @if (cartService.cartCount() > 0) {
+          <span class="badge cart-badge">{{ cartService.cartCount() }}</span>
+        }
+      </a>
+
+      <!-- Chatbot button -->
+      <button class="icon-btn chatbot-nav-btn" (click)="chatOpen.update(v => !v)"
+        [class.active]="chatOpen()" title="Movie Assistant">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+        @if (chatOpen()) {
+          <span class="chat-active-dot"></span>
+        }
+      </button>
+
+      <!-- Divider -->
+      <div class="nav-divider"></div>
+
+      <!-- Theme toggle -->
+      <div class="theme-toggle-wrap" title="Toggle dark / light mode">
+        @if (isDark()) {
+          <!-- Sun: currently dark, click to go light -->
+          <svg class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+          </svg>
+        } @else {
+          <!-- Moon: currently light, click to go dark -->
+          <svg class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+          </svg>
+        }
+        <div class="form-check form-switch mb-0">
+          <input
+            class="form-check-input theme-switch"
+            type="checkbox"
+            role="switch"
+            id="themeSwitch"
+            [checked]="!isDark()"
+            (change)="toggleTheme()" />
+        </div>
+      </div>
+
+      <!-- User + logout grouped pill -->
+      <div class="user-menu-wrap">
+        <button class="user-menu-btn"
+          (click)="showLogoutDrop.update(v => !v)"
+          [class.open]="showLogoutDrop()">
+          <div class="user-avatar-lg">
+            {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
+          </div>
+          <span class="user-name-txt">{{ auth.currentUser()?.userName }}</span>
+          <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
+            [style.transform]="showLogoutDrop() ? 'rotate(180deg)' : 'rotate(0deg)'">
+            <path d="M7 10l5 5 5-5z"/>
+          </svg>
+        </button>
+
+        @if (showLogoutDrop()) {
+          <div class="user-drop">
+            <div class="user-drop-header">
+              <div class="user-drop-avatar">
+                {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
+              </div>
+              <div>
+                <p class="user-drop-name">{{ auth.currentUser()?.userName }}</p>
+                <p class="user-drop-role">{{ auth.currentUser()?.role }}</p>
+              </div>
+            </div>
+            <div class="user-drop-divider"></div>
+            <button class="user-drop-item danger" (click)="confirmLogout()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+              </svg>
+              Sign Out
+            </button>
+          </div>
+          <div class="overlay-backdrop" (click)="cancelLogout()"></div>
+        }
+      </div>
+
+      <!-- Mobile burger -->
+      <button class="burger-btn" (click)="menuOpen.update(v => !v)">
+        @if (menuOpen()) {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  @if (menuOpen()) {
+    <div class="mobile-menu">
+      <a routerLink="/home"       (click)="menuOpen.set(false)">Home</a>
+      <a routerLink="/my-rentals" (click)="menuOpen.set(false)">My Rentals</a>
+      <a routerLink="/wishlist"   (click)="menuOpen.set(false)">Wishlist</a>
+      <a routerLink="/cart"       (click)="menuOpen.set(false)">Cart</a>
+      <div class="mobile-divider"></div>
+      <button class="mobile-logout" (click)="confirmLogout()">Sign Out</button>
+    </div>
+  }
+</nav>
+
+<!-- Chatbot — floats globally, toggled from navbar button -->
+<app-chatbot [forceOpen]="chatOpen()" (closed)="chatOpen.set(false)" />

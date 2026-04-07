@@ -1,0 +1,26 @@
+<section class="row-section">
+  <div class="row-header">
+    <h2 class="row-title">{{ title() }}</h2>
+    @if (badge()) {
+      <span class="row-badge">{{ badge() }}</span>
+    }
+  </div>
+
+  @if (movies().length === 0) {
+    <p class="empty-row">No movies available</p>
+  } @else {
+    <div class="scroll-wrap">
+      @if (canScroll()) {
+        <button class="arr left" (click)="prev()" aria-label="Previous">&#8249;</button>
+      }
+      <div class="row-track">
+        @for (m of visibleMovies(); track m.id) {
+          <app-browse-card [movie]="m" />
+        }
+      </div>
+      @if (canScroll()) {
+        <button class="arr right" (click)="next()" aria-label="Next">&#8250;</button>
+      }
+    </div>
+  }
+</section>

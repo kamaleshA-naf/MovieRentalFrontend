@@ -1,0 +1,1056 @@
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design tokens ──────────────────────────────────────── */
+:root {
+  /* Colors */
+  --bg:          #000000;
+  --bg-1:        #0a0a0a;
+  --bg-2:        #111111;
+  --bg-3:        #1a1a1a;
+  --bg-glass:    rgba(255,255,255,0.04);
+  --border:      rgba(255,255,255,0.08);
+  --border-md:   rgba(255,255,255,0.12);
+
+  --txt:         #f5f5f7;
+  --txt-2:       rgba(245,245,247,0.65);
+  --txt-3:       rgba(245,245,247,0.35);
+  --txt-4:       rgba(245,245,247,0.18);
+
+  --blue:        #0a84ff;
+  --blue-hover:  #1a8fff;
+  --blue-dim:    rgba(10,132,255,0.12);
+  --green:       #30d158;
+  --green-dim:   rgba(48,209,88,0.12);
+  --red:         #ff375f;
+  --red-dim:     rgba(255,55,95,0.12);
+  --orange:      #ff9f0a;
+  --orange-dim:  rgba(255,159,10,0.12);
+  --pink:        #ff2d78;
+  --yellow:      #ffd60a;
+
+  /* Typography */
+  --font:        'Inter', -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', sans-serif;
+  --mono:        'SF Mono', 'Fira Code', monospace;
+
+  /* Radius */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   20px;
+  --r-full: 9999px;
+
+  /* Shadow */
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md:  0 8px 32px rgba(0,0,0,0.5);
+  --shadow-lg:  0 16px 64px rgba(0,0,0,0.6);
+  --shadow-blue: 0 4px 20px rgba(10,132,255,0.3);
+
+  /* Transitions */
+  --ease:    cubic-bezier(0.25,0.46,0.45,0.94);
+  --bounce:  cubic-bezier(0.34,1.56,0.64,1);
+  --spring:  cubic-bezier(0.175,0.885,0.32,1.275);
+}
+
+/* ── Base ───────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family:      var(--font);
+  background-color: var(--bg);
+  color:            var(--txt);
+  line-height:      1.6;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Smooth theme transition */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--txt);
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+a:hover { color: var(--blue-hover); }
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--r-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ── Selection ──────────────────────────────────────────── */
+::selection {
+  background: rgba(10,132,255,0.35);
+  color: #fff;
+}
+
+/* ── Focus ──────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Utility classes ────────────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Skeleton loading ───────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--r-md);
+}
+
+/* ── Glass card ─────────────────────────────────────────── */
+.glass-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  backdrop-filter: blur(12px);
+}
+
+/* ── Spinner ────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.1);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Button base ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--shadow-blue);
+}
+.btn-primary:hover {
+  background: var(--blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(10,132,255,0.4);
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.06);
+  color: var(--txt-2);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--txt);
+}
+.btn-danger {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(255,55,95,0.2);
+  padding: 0.75rem 1.5rem;
+}
+.btn-danger:hover { background: rgba(255,55,95,0.2); }
+
+/* ── Form inputs ────────────────────────────────────────── */
+.input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.82rem 1rem;
+  color: var(--txt);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  transition: border-color 0.2s var(--ease),
+              background 0.2s var(--ease);
+  outline: none;
+}
+.input:focus {
+  border-color: var(--blue);
+  background: rgba(10,132,255,0.04);
+}
+.input::placeholder { color: var(--txt-4); }
+
+/* ── Badge ──────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--r-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.badge-blue   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(10,132,255,0.2); }
+.badge-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(48,209,88,0.2);  }
+.badge-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(255,55,95,0.2);  }
+.badge-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,159,10,0.2); }
+
+/* ── Modal backdrop ─────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s var(--ease);
+}
+.modal-box {
+  background: #111;
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+  animation: slideUp 0.25s var(--bounce);
+}
+
+/* ── Status badges ──────────────────────────────────────── */
+.status-active   { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(48,209,88,0.2);  }
+.status-expired  { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,159,10,0.2); }
+.status-returned { background: var(--bg-glass);   color: var(--txt-3);  border: 1px solid var(--border);        }
+
+/* ── Page wrapper ───────────────────────────────────────── */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Toastr overrides ───────────────────────────────────── */
+
+/*
+  Force the container to the top of the stacking order.
+  backdrop-filter and transform on child elements (hero, navbar)
+  create new stacking contexts — we break out of them by
+  targeting the container directly on <body>.
+*/
+.toast-container {
+  position: fixed !important;
+  z-index: 999999 !important;
+  pointer-events: none;
+}
+
+.toast-container.toast-top-right {
+  top: 16px !important;
+  right: 16px !important;
+}
+
+.toast-container.toast-top-center {
+  top: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.toast-container * {
+  pointer-events: all;
+}
+
+.toast-container .ngx-toastr {
+  font-family: var(--font) !important;
+  position: relative !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.3),
+    0 12px 40px rgba(0,0,0,0.6) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  padding: 14px 40px 14px 52px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  width: 320px !important;
+  cursor: pointer;
+  overflow: hidden;
+  /* break out of any parent stacking context */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.toast-container .ngx-toastr:hover {
+  box-shadow:
+    0 8px 12px rgba(0,0,0,0.4),
+    0 20px 60px rgba(0,0,0,0.7) !important;
+  opacity: 1 !important;
+}
+
+/* ── Type variants ── */
+.toast-container .toast-success {
+  background: linear-gradient(135deg, #0d2b1a 0%, #0a2016 100%) !important;
+  border-color: rgba(48, 209, 88, 0.25) !important;
+  color: #d4f5e2 !important;
+}
+.toast-container .toast-error {
+  background: linear-gradient(135deg, #2b0d14 0%, #200a10 100%) !important;
+  border-color: rgba(255, 55, 95, 0.25) !important;
+  color: #fdd4dc !important;
+}
+.toast-container .toast-warning {
+  background: linear-gradient(135deg, #2b1e0d 0%, #20160a 100%) !important;
+  border-color: rgba(255, 159, 10, 0.25) !important;
+  color: #fdefd4 !important;
+}
+.toast-container .toast-info {
+  background: linear-gradient(135deg, #0d1a2b 0%, #0a1420 100%) !important;
+  border-color: rgba(10, 132, 255, 0.25) !important;
+  color: #d4e8fd !important;
+}
+
+/* ── Title & message ── */
+.toast-container .toast-title {
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  margin-bottom: 3px !important;
+  letter-spacing: -0.01em !important;
+}
+.toast-container .toast-message {
+  font-size: 0.82rem !important;
+  opacity: 0.8 !important;
+  line-height: 1.45 !important;
+}
+
+/* ── Close button ── */
+.toast-container .toast-close-button {
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+  font-size: 18px !important;
+  font-weight: 300 !important;
+  color: rgba(255,255,255,0.4) !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  line-height: 1 !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: color 0.15s !important;
+}
+.toast-container .toast-close-button:hover {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* ── Progress bar ── */
+.toast-container .toast-progress {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 3px !important;
+  border-radius: 0 0 14px 14px !important;
+  opacity: 1 !important;
+}
+.toast-container .toast-success .toast-progress { background: #30d158 !important; }
+.toast-container .toast-error   .toast-progress { background: #ff375f !important; }
+.toast-container .toast-warning .toast-progress { background: #ff9f0a !important; }
+.toast-container .toast-info    .toast-progress { background: #0a84ff !important; }
+
+/* ── Icon area (left colored strip) ── */
+.toast-container .toast-success::before,
+.toast-container .toast-error::before,
+.toast-container .toast-warning::before,
+.toast-container .toast-info::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 14px 0 0 14px;
+}
+.toast-container .toast-success::before { background: #30d158; }
+.toast-container .toast-error::before   { background: #ff375f; }
+.toast-container .toast-warning::before { background: #ff9f0a; }
+.toast-container .toast-info::before    { background: #0a84ff; }
+
+/* ── Light theme ─────────────────────────────────────────── */
+body.light {
+  --bg:          #f0f4f8;
+  --bg-1:        #ffffff;
+  --bg-2:        #ffffff;
+  --bg-3:        #e8edf2;
+  --bg-glass:    rgba(0,0,0,0.04);
+  --border:      rgba(0,0,0,0.1);
+  --border-md:   rgba(0,0,0,0.16);
+
+  /* Strong, readable text for light backgrounds */
+  --txt:         #0d0d0f;
+  --txt-2:       #3a3a3c;
+  --txt-3:       #6e6e73;
+  --txt-4:       #aeaeb2;
+
+  --blue-dim:    rgba(10,132,255,0.1);
+  --green-dim:   rgba(48,209,88,0.1);
+  --red-dim:     rgba(255,55,95,0.1);
+  --orange-dim:  rgba(255,159,10,0.1);
+
+  background-color: var(--bg);
+  color: var(--txt);
+}
+
+/* ── Global light-mode element resets ───────────────────── */
+/* Force ALL dark-hardcoded backgrounds to white/light */
+body.light .page,
+body.light .rentals-content,
+body.light .content,
+body.light .cart-page {
+  background: var(--bg);
+  color: var(--txt);
+}
+
+/* Cards — override any rgba(28,28,30,...) hardcoded values */
+body.light .rental-card,
+body.light .cart-card,
+body.light .movie-card,
+body.light .summary-card,
+body.light .section-card,
+body.light .stat-box,
+body.light .rating-box,
+body.light .price-card,
+body.light .login-card,
+body.light .register-card,
+body.light .modal,
+body.light .modal-box {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+}
+
+body.light .rental-card:hover,
+body.light .cart-card:hover,
+body.light .movie-card:hover {
+  border-color: rgba(0,0,0,0.18) !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12) !important;
+}
+
+/* Preserve border-left accent on rental cards */
+body.light .rental-card.card-active  { border-left: 3px solid #30d158 !important; }
+body.light .rental-card.card-expired { border-left: 3px solid #ff9f0a !important; }
+body.light .rental-card.card-returned { border-left: 3px solid rgba(0,0,0,0.15) !important; }
+
+/* Rental page specific */
+body.light .rentals-content { background: var(--bg); }
+body.light .filter-tabs .tab { font-family: inherit; }
+body.light .card-actions { border-top-color: rgba(0,0,0,0.08) !important; }
+body.light .date-row { border-color: transparent; }
+body.light .progress-bar { background: rgba(0,0,0,0.08) !important; }
+body.light .movie-title { color: #0d0d0f !important; }
+body.light .days-num { color: #0d0d0f !important; }
+body.light .days-label { color: #6e6e73 !important; }
+body.light .date-label { color: #aeaeb2 !important; }
+body.light .date-val { color: #3a3a3c !important; }
+
+/* Refund modal light mode */
+body.light .refund-modal { background: #ffffff !important; border-color: rgba(0,0,0,0.1) !important; }
+body.light .refund-header { border-bottom-color: rgba(0,0,0,0.07) !important; }
+body.light .refund-header h3 { color: #0d0d0f !important; }
+body.light .refund-movie { color: #6e6e73 !important; }
+body.light .refund-row { color: #3a3a3c !important; border-bottom-color: rgba(0,0,0,0.06) !important; }
+body.light .refund-policy { background: rgba(0,0,0,0.03) !important; color: #6e6e73 !important; }
+body.light .btn-cancel-refund { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.12) !important; color: #3a3a3c !important; }
+
+/* All text — ensure dark text on light backgrounds */
+body.light h1, body.light h2, body.light h3,
+body.light h4, body.light h5, body.light h6 {
+  color: #0d0d0f;
+}
+
+body.light .page-title,
+body.light .cart-title,
+body.light .greeting,
+body.light .movie-title,
+body.light .card-title,
+body.light .summary-title,
+body.light .sc-head h3,
+body.light .modal-header h3,
+body.light .rental-movie,
+body.light .wl-title,
+body.light .cart-movie-title,
+body.light .days-num,
+body.light .stat-num {
+  color: #0d0d0f !important;
+}
+
+body.light .page-sub,
+body.light .cart-sub,
+body.light .profile-email,
+body.light .rental-meta,
+body.light .wl-meta,
+body.light .card-date,
+body.light .date-val,
+body.light .row-meta,
+body.light .grid-meta,
+body.light .stat-lbl,
+body.light .days-label,
+body.light .modal-sub,
+body.light .summary-note {
+  color: #6e6e73 !important;
+}
+
+body.light .date-label,
+body.light .dur-label,
+body.light .price-lbl,
+body.light .rating-lbl {
+  color: #aeaeb2 !important;
+}
+
+/* Row/section titles */
+body.light .sec-head h2,
+body.light .row-title,
+body.light .greeting-hi,
+body.light .description,
+body.light .meta-row,
+body.light .dur-num,
+body.light .dur-val,
+body.light .sum-name,
+body.light .sum-val,
+body.light .cost-total {
+  color: #0d0d0f !important;
+}
+
+body.light .greeting-sub,
+body.light .empty-title,
+body.light .empty-sub,
+body.light .empty-catalog-title,
+body.light .empty-catalog-sub {
+  color: #6e6e73 !important;
+}
+
+/* Borders */
+body.light .card-actions,
+body.light .sc-head,
+body.light .rental-row,
+body.light .wishlist-row,
+body.light .summary-divider,
+body.light .progress-bar,
+body.light .days-track {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* Tabs / pills / filter buttons */
+body.light .tab,
+body.light .pill,
+body.light .dur-btn,
+body.light .az-btn {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #3a3a3c !important;
+}
+body.light .tab:hover,
+body.light .pill:hover,
+body.light .az-btn:hover {
+  background: rgba(0,0,0,0.08) !important;
+  color: #0d0d0f !important;
+}
+body.light .tab.active {
+  background: rgba(10,132,255,0.12) !important;
+  border-color: rgba(10,132,255,0.3) !important;
+  color: #0a84ff !important;
+}
+body.light .pill.active {
+  background: #0a84ff !important;
+  border-color: #0a84ff !important;
+  color: #fff !important;
+}
+
+/* Search input */
+body.light .search-wrap {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+body.light .search-wrap input {
+  color: #0d0d0f !important;
+}
+body.light .search-wrap input::placeholder { color: #aeaeb2 !important; }
+body.light .s-ico { color: #aeaeb2 !important; }
+
+/* Duration controls */
+body.light .dur-btn-sm {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0d0d0f !important;
+}
+
+/* Detail buttons */
+body.light .btn-detail,
+body.light .btn-secondary {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #3a3a3c !important;
+}
+body.light .btn-detail:hover,
+body.light .btn-secondary:hover {
+  background: rgba(0,0,0,0.1) !important;
+  color: #0d0d0f !important;
+}
+
+/* Wishlist/cart side buttons */
+body.light .wishlist-btn,
+body.light .side-btn {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #3a3a3c !important;
+}
+body.light .wishlist-btn:hover { background: rgba(0,0,0,0.08) !important; }
+
+/* Genre tags */
+body.light .genre-tag,
+body.light .genre-chip {
+  background: rgba(10,132,255,0.08) !important;
+  border-color: rgba(10,132,255,0.2) !important;
+  color: #0055b3 !important;
+}
+
+/* A-Z bar */
+body.light .az-bar {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+body.light .az-label { color: #aeaeb2 !important; }
+body.light .az-btn.has-movies { color: #3a3a3c !important; border-color: rgba(0,0,0,0.14) !important; }
+
+/* Section badges */
+body.light .sec-badge { background: rgba(10,132,255,0.1) !important; color: #0055b3 !important; }
+body.light .top10-badge { background: rgba(180,130,0,0.1) !important; color: #7a5500 !important; }
+body.light .south-badge { background: rgba(0,140,60,0.1) !important; color: #006630 !important; }
+
+/* Poster fallback */
+body.light .poster-fallback,
+body.light .thumb-fallback { background: #e8edf2 !important; }
+body.light .fallback-text { color: #aeaeb2 !important; }
+
+/* Price tag on poster */
+body.light .price-tag {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0d0d0f !important;
+}
+
+/* Modal backdrop */
+body.light .modal-backdrop { background: rgba(0,0,0,0.45) !important; }
+
+/* Scrollbar */
+body.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+
+/* ── Light mode toastr ───────────────────────────────────── */
+body.light .toast-container .toast-success {
+  background: linear-gradient(135deg, #e8faf0 0%, #d4f5e2 100%) !important;
+  color: #0a5c2a !important;
+  border-color: rgba(48,209,88,0.3) !important;
+}
+body.light .toast-container .toast-error {
+  background: linear-gradient(135deg, #fde8ec 0%, #fdd4dc 100%) !important;
+  color: #8b0a1e !important;
+  border-color: rgba(255,55,95,0.3) !important;
+}
+body.light .toast-container .toast-warning {
+  background: linear-gradient(135deg, #fef3e2 0%, #fdefd4 100%) !important;
+  color: #7a4a00 !important;
+  border-color: rgba(255,159,10,0.3) !important;
+}
+body.light .toast-container .toast-info {
+  background: linear-gradient(135deg, #e2effe 0%, #d4e8fd 100%) !important;
+  color: #0a3a6e !important;
+  border-color: rgba(10,132,255,0.3) !important;
+}
+
+/* ── Smooth theme transition on all elements ─────────────── */
+body,
+body .page,
+body .rental-card,
+body .cart-card,
+body .movie-card,
+body .summary-card,
+body .section-card,
+body .stat-box,
+body .rating-box,
+body .price-card,
+body .tab,
+body .pill,
+body .az-bar,
+body .search-wrap {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* ── Bootstrap conflict reset ────────────────────────────── */
+/* Prevent Bootstrap from overriding our font and body styles */
+body { font-family: var(--font) !important; }
+
+/* Bootstrap form-check-input (theme toggle switch) */
+.form-check-input:focus { box-shadow: none !important; }
+
+/* ── Global modal override — beats Bootstrap (z-index 1050) ── */
+/* Bootstrap sets z-index on .modal and .modal-backdrop classes  */
+/* Our app uses .modal-backdrop as the full-screen overlay       */
+app-movie-detail .modal-backdrop,
+app-movie-detail .modal {
+  /* Ensure our modals are never trapped by Bootstrap */
+  z-index: 99999 !important;
+}
+
+/* Prevent Bootstrap from hijacking our .modal class */
+.modal-backdrop.show { opacity: 1 !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE — COMPREHENSIVE THEME FIXES
+   Fixes invisible/low-contrast text across all components
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Movie Detail page ───────────────────────────────────── */
+body.light .detail-content { background: transparent; }
+
+body.light .movie-title,
+body.light .deleted-title {
+  color: #0d0d0f !important;
+}
+
+body.light .description {
+  color: #3a3a3c !important;
+}
+
+body.light .meta-row,
+body.light .meta-item,
+body.light .meta-dot {
+  color: #6e6e73 !important;
+}
+
+body.light .genre-tag {
+  background: rgba(10,132,255,0.08) !important;
+  border-color: rgba(10,132,255,0.2) !important;
+  color: #0055b3 !important;
+}
+
+body.light .price-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+body.light .price-lbl { color: #aeaeb2 !important; }
+body.light .price-val { color: #0d0d0f !important; }
+body.light .price-val span { color: #6e6e73 !important; }
+body.light .price-note { color: #6e6e73 !important; }
+
+body.light .btn-secondary {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #3a3a3c !important;
+}
+
+body.light .btn-cart-cta {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.14) !important;
+  color: #3a3a3c !important;
+}
+
+body.light .access-badge { color: #1a7a35 !important; }
+body.light .expired-notice { color: #c47a00 !important; }
+
+body.light .deleted-sub { color: #6e6e73 !important; }
+
+/* ── Home page ───────────────────────────────────────────── */
+body.light .hero-title { color: #fff !important; } /* hero always dark bg */
+body.light .hero-desc  { color: rgba(255,255,255,0.8) !important; }
+body.light .hero-meta  { color: rgba(255,255,255,0.65) !important; }
+
+body.light .greeting-hi  { color: #0d0d0f !important; }
+body.light .greeting-sub { color: #6e6e73 !important; }
+
+body.light .sec-head h2,
+body.light .carousel-title { color: #0d0d0f !important; }
+
+body.light .row-title  { color: #0d0d0f !important; }
+body.light .row-meta   { color: #6e6e73 !important; }
+body.light .grid-title { color: #0d0d0f !important; }
+body.light .grid-meta  { color: #6e6e73 !important; }
+
+body.light .result-count { color: #6e6e73 !important; }
+
+body.light .no-results-title  { color: #3a3a3c !important; }
+body.light .no-results-sub    { color: #6e6e73 !important; }
+body.light .empty-catalog-title { color: #3a3a3c !important; }
+body.light .empty-catalog-sub   { color: #6e6e73 !important; }
+
+body.light .all-loaded { color: #aeaeb2 !important; }
+
+/* Row cards on light */
+body.light .row-card:hover .row-thumb {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2) !important;
+}
+
+/* Carousel component */
+body.light .carousel-root { color: #0d0d0f; }
+body.light .carousel-count { color: #aeaeb2 !important; }
+body.light .carousel-page-info {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #6e6e73 !important;
+}
+body.light .carousel-arrow {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #3a3a3c !important;
+}
+body.light .carousel-arrow:hover:not(.disabled) {
+  background: rgba(0,0,0,0.1) !important;
+  color: #0d0d0f !important;
+}
+body.light .card-title    { color: #0d0d0f !important; }
+body.light .card-subtitle { color: #6e6e73 !important; }
+body.light .card-meta     { color: #aeaeb2 !important; }
+body.light .card-thumb {
+  background: #e8edf2 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+body.light .card-thumb-placeholder { color: #aeaeb2 !important; }
+body.light .dot { background: rgba(0,0,0,0.15) !important; }
+body.light .dot.active { background: #0a84ff !important; }
+
+/* ── My Rentals ──────────────────────────────────────────── */
+body.light .page-title { color: #0d0d0f !important; }
+body.light .page-sub   { color: #6e6e73 !important; }
+
+body.light .rental-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .movie-title  { color: #0d0d0f !important; }
+body.light .days-num     { color: #0d0d0f !important; }
+body.light .days-label   { color: #6e6e73 !important; }
+body.light .date-label   { color: #aeaeb2 !important; }
+body.light .date-val     { color: #3a3a3c !important; }
+body.light .rental-expired-msg { color: #6e6e73 !important; }
+
+/* ── Wishlist ────────────────────────────────────────────── */
+body.light .movie-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .card-title  { color: #0d0d0f !important; }
+body.light .card-date   { color: #6e6e73 !important; }
+body.light .summary-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .summary-title { color: #0d0d0f !important; }
+body.light .summary-name  { color: #3a3a3c !important; }
+body.light .summary-price { color: #6e6e73 !important; }
+body.light .summary-total { color: #0d0d0f !important; }
+body.light .summary-note  { color: #6e6e73 !important; }
+body.light .summary-sep   { background: rgba(0,0,0,0.08) !important; }
+body.light .summary-row   { border-color: rgba(0,0,0,0.06) !important; }
+
+/* ── Profile ─────────────────────────────────────────────── */
+body.light .greeting     { color: #0d0d0f !important; }
+body.light .profile-email { color: #6e6e73 !important; }
+body.light .stat-box {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .stat-num { color: #0d0d0f !important; }
+body.light .stat-lbl { color: #6e6e73 !important; }
+body.light .section-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .sc-head h3    { color: #0d0d0f !important; }
+body.light .rental-movie  { color: #0d0d0f !important; }
+body.light .rental-meta   { color: #6e6e73 !important; }
+body.light .wl-title      { color: #0d0d0f !important; }
+body.light .wl-meta       { color: #6e6e73 !important; }
+body.light .txn-id-txt    { color: #aeaeb2 !important; }
+body.light .txn-movie     { color: #0d0d0f !important; }
+body.light .txn-date      { color: #6e6e73 !important; }
+body.light .txn-amount    { color: #0d0d0f !important; }
+body.light .empty-mini    { color: #6e6e73 !important; }
+body.light .rental-row    { border-color: rgba(0,0,0,0.07) !important; }
+body.light .wishlist-row  { border-color: rgba(0,0,0,0.07) !important; }
+body.light .txn-row       { border-color: rgba(0,0,0,0.07) !important; }
+body.light .days-track    { background: rgba(0,0,0,0.08) !important; }
+body.light .days-txt      { color: #6e6e73 !important; }
+
+/* ── Cart ────────────────────────────────────────────────── */
+body.light .cart-page     { background: var(--bg) !important; }
+body.light .cart-title    { color: #0d0d0f !important; }
+body.light .cart-sub      { color: #6e6e73 !important; }
+body.light .cart-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body.light .cart-movie-title { color: #0d0d0f !important; }
+body.light .cart-meta        { color: #6e6e73 !important; }
+body.light .dur-label        { color: #aeaeb2 !important; }
+body.light .dur-val          { color: #0d0d0f !important; }
+body.light .sum-name         { color: #3a3a3c !important; }
+body.light .sum-val          { color: #0d0d0f !important; }
+body.light .cost-total       { color: #0d0d0f !important; border-top-color: rgba(0,0,0,0.08) !important; }
+
+/* ── Auth pages ──────────────────────────────────────────── */
+body.light .login-card,
+body.light .register-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* ── Modals ──────────────────────────────────────────────── */
+body.light .modal-header h3 { color: #0d0d0f !important; }
+body.light .modal-sub       { color: #6e6e73 !important; }
+body.light .dur-num         { color: #0d0d0f !important; }
+body.light .dur-unit        { color: #aeaeb2 !important; }
+body.light .dur-price       { color: #0a84ff !important; }
+body.light .cost-total strong { color: #0d0d0f !important; }
+body.light .pay-row         { color: #3a3a3c !important; border-color: rgba(0,0,0,0.08) !important; }
+body.light .pay-row strong  { color: #0d0d0f !important; }
+body.light .pay-success-box h2 { color: #0d0d0f !important; }
+body.light .pay-success-box p  { color: #6e6e73 !important; }
+
+/* ── Notification panel ──────────────────────────────────── */
+body.light .notif-panel {
+  background: rgba(255,255,255,0.98) !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+body.light .notif-header h3 { color: #0d0d0f !important; }
+body.light .notif-title     { color: #0d0d0f !important; }
+body.light .notif-msg       { color: #6e6e73 !important; }
+body.light .notif-time      { color: #aeaeb2 !important; }
+
+/* ── Chatbot ─────────────────────────────────────────────── */
+body.light .chat-window {
+  background: rgba(252,252,253,0.98) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+}
+body.light .chat-title  { color: #0d0d0f !important; }
+body.light .chat-status { color: #1a7a35 !important; }
+body.light .chat-action-btn {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #6e6e73 !important;
+}
+body.light .chat-body { background: transparent; }
+body.light .chat-empty { color: #aeaeb2 !important; }
+body.light .chat-empty-icon { color: #d1d1d6 !important; }
+body.light .bot-bubble {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  color: #3a3a3c !important;
+}
+body.light .chat-suggestions { border-top-color: rgba(0,0,0,0.07) !important; }
+body.light .chip {
+  background: rgba(10,132,255,0.08) !important;
+  border-color: rgba(10,132,255,0.2) !important;
+  color: #0055b3 !important;
+}
+body.light .chat-footer { border-top-color: rgba(0,0,0,0.07) !important; }
+body.light .chat-input {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0d0d0f !important;
+}
+body.light .chat-input::placeholder { color: #aeaeb2 !important; }
+body.light .chat-input:focus {
+  border-color: rgba(10,132,255,0.4) !important;
+  background: rgba(10,132,255,0.04) !important;
+}
+
+/* ── Skeleton shimmer on light ───────────────────────────── */
+body.light .skeleton-thumb,
+body.light .skeleton-line {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.05) 25%,
+    rgba(0,0,0,0.09) 50%,
+    rgba(0,0,0,0.05) 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* ── Load more spinner text ──────────────────────────────── */
+body.light .load-more-spinner { color: #6e6e73 !important; }
+body.light .all-loaded        { color: #aeaeb2 !important; }
