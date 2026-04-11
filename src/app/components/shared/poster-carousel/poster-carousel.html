@@ -1,0 +1,89 @@
+<div class="pc-root">
+
+  <!-- Header -->
+  <div class="pc-head">
+    @if (icon) { <span class="pc-icon" [innerHTML]="icon"></span> }
+    <h2 class="pc-title">{{ title }}</h2>
+    @if (items.length > 0) {
+      <span class="pc-count">{{ items.length }}</span>
+    }
+    <div class="pc-arrows">
+      <button class="pc-arrow" (click)="scrollLeft()" [disabled]="items.length === 0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+      </button>
+      <button class="pc-arrow" (click)="scrollRight()" [disabled]="items.length === 0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Track -->
+  <div class="pc-track" #track
+    (mousedown)="onDragStart($event)"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()">
+
+    <!-- Skeletons -->
+    @if (loading && items.length === 0) {
+      @for (s of skeletons; track s) {
+        <div class="pc-card skeleton-card">
+          <div class="pc-thumb skeleton-thumb"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      }
+    }
+
+    <!-- Cards -->
+    @for (item of visibleItems(); track item.id; let i = $index) {
+      <div class="pc-card" [style.animation-delay]="(i * 50) + 'ms'"
+        (click)="itemClick.emit(item)">
+
+        <div class="pc-thumb">
+          @if (item.imageUrl) {
+            <img [src]="item.imageUrl" [alt]="item.title" loading="lazy"
+              (error)="onImgError($event)" />
+          } @else {
+            <div class="pc-thumb-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+              </svg>
+            </div>
+          }
+
+          <!-- Gradient overlay with info -->
+          <div class="pc-overlay">
+            <div class="pc-overlay-info">
+              <p class="pc-overlay-title">{{ item.title }}</p>
+              @if (item.meta) { <p class="pc-overlay-meta">{{ item.meta }}</p> }
+            </div>
+            <div class="pc-play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+
+          @if (item.badge) {
+            <span class="pc-badge" [class]="item.badgeClass ?? 'badge-default'">
+              {{ item.badge }}
+            </span>
+          }
+        </div>
+
+        <div class="pc-info">
+          <p class="pc-card-title">{{ item.title }}</p>
+          @if (item.meta) { <p class="pc-card-meta">{{ item.meta }}</p> }
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+</div>

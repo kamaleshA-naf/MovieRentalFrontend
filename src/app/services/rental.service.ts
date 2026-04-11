@@ -30,6 +30,11 @@ export interface UserPayment {
   paidAt:     string;
 }
 
+interface PagedPayments {
+  data:  UserPayment[];
+  items: UserPayment[];
+}
+
 export interface RentRequest {
   userId:       number;
   movieId:      number;
@@ -41,9 +46,10 @@ export class RentalService {
   private readonly API = environment.apiBase;
   private http = inject(HttpClient);
 
-  myRentals  = signal<RentalItem[]>([]);
-  myPayments = signal<UserPayment[]>([]);
-  isLoading  = signal(false);
+  myRentals      = signal<RentalItem[]>([]);
+  myPayments     = signal<UserPayment[]>([]);
+  isLoading      = signal(false);
+  paymentsLoading = signal(false);
 
   loadMyRentals(userId: number): void {
     if (!userId) return;
@@ -58,11 +64,20 @@ export class RentalService {
         this.isLoading.set(false);
       });
 
-    // Load payments to resolve actual amounts
+    // Load payments — response is PagedResultDto, unwrap .data
+    this.paymentsLoading.set(true);
     this.http
-      .get<UserPayment[]>(`${this.API}/Payment/user/${userId}`)
-      .pipe(catchError(() => of([])))
-      .subscribe((p: UserPayment[]) => this.myPayments.set(p ?? []));
+      .get<PagedPayments>(`${this.API}/Payment/user/${userId}?pageSize=200`)
+      .pipe(catchError((err) => {
+        console.error('[RentalService] Failed to load payments:', err);
+        return of({ data: [], items: [] } as PagedPayments);
+      }))
+      .subscribe((res: PagedPayments) => {
+        const payments = res?.data ?? res?.items ?? [];
+        console.log(`[RentalService] Loaded ${payments.length} payments for user ${userId}`);
+        this.myPayments.set(payments);
+        this.paymentsLoading.set(false);
+      });
   }
 
   /** Actual amount charged for a rental (from Completed payment record) */

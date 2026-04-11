@@ -1,94 +1,87 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
+import { MovieService } from '../../../services/movie.service';
 import { RentalService } from '../../../services/rental.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { NavbarComponent } from '../../shared/navbar/navbar';
 import { CarouselComponent, CarouselItem } from '../../shared/carousel/carousel';
-import { environment } from '@env/environment';
+
+type Tab = 'overview' | 'rentals' | 'wishlist' | 'transactions';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, CarouselComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, CarouselComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
 export class ProfileComponent implements OnInit {
   auth            = inject(AuthService);
+  movieService    = inject(MovieService);
   rentalService   = inject(RentalService);
   wishlistService = inject(WishlistService);
-  private router  = inject(Router);
-  private http    = inject(HttpClient);
+  router          = inject(Router);   // public — used in template
 
-  private readonly API = environment.apiBase;
+  activeTab  = signal<Tab>('overview');
+  isLoading  = signal(true);
+  txnLoading = computed(() => this.rentalService.paymentsLoading());
 
-  activeTab = signal<'overview' | 'rentals' | 'wishlist' | 'transactions'>('overview');
-  isLoading = signal(true);
-
+  // ── Rental slices ─────────────────────────────────────────
   activeRentals = computed(() =>
     this.rentalService.myRentals().filter(r => r.status === 'Active')
   );
-
   expiredRentals = computed(() =>
     this.rentalService.myRentals().filter(r => r.status === 'Expired')
   );
-
-  // Transactions derived from rentals + actual payment records
-  transactions = computed(() =>
-    this.rentalService.myRentals().map(r => {
-      const isRefunded = r.status === 'Returned';
-
-      // 1. Try actual payment records (most accurate)
-      const paidFromRecord    = this.rentalService.getAmountPaidForRental(r.id);
-      const refundFromRecord  = this.rentalService.getRefundedAmountForRental(r.id);
-
-      // 2. Fallback: totalPaid from DTO
-      const totalPaidDto = r.totalPaid ?? 0;
-
-      // 3. Fallback: rentalPrice × days
-      const price = r.rentalPrice ?? 0;
-      const days  = Math.max(1, Math.ceil(
-        (new Date(r.expiryDate).getTime() - new Date(r.rentalDate).getTime()) / 86400000
-      ));
-      const calculated = price > 0 ? price * days : 0;
-
-      const totalPaid = paidFromRecord > 0 ? paidFromRecord
-                      : totalPaidDto   > 0 ? totalPaidDto
-                      : calculated;
-
-      const refundAmt = isRefunded
-        ? (refundFromRecord > 0 ? refundFromRecord
-          : r.refundAmount && r.refundAmount > 0 ? r.refundAmount
-          : Math.round(totalPaid * 0.9))
-        : 0;
-
-      return {
-        txnId:        `TXN${r.id.toString().padStart(6, '0')}${Math.abs(r.movieId * 7 % 1000).toString().padStart(3,'0')}`,
-        movieTitle:   r.movieTitle,
-        status:       isRefunded ? 'Refunded' : 'Completed',
-        amount:       isRefunded ? refundAmt : totalPaid,
-        date:         r.rentalDate,
-        expiryDate:   r.expiryDate,
-        rentalStatus: r.status
-      };
-    })
+  returnedRentals = computed(() =>
+    this.rentalService.myRentals().filter(r => r.status === 'Returned')
   );
 
+  // ── Transactions ──────────────────────────────────────────
+  transactions = computed(() =>
+    this.rentalService.myPayments().map(p => ({
+      txnId:      `TXN${p.id.toString().padStart(9, '0')}`,
+      movieTitle: p.movieTitle || '—',
+      status:     p.status,   // 'Completed' | 'Refunded' | 'Failed'
+      amount:     p.amount,
+      method:     p.method || '—',
+      date:       p.paidAt,
+    }))
+  );
+
+  txnStatusFilter = signal<string>('all');
+  txnSort         = signal<'newest' | 'oldest'>('newest');
+  txnSortOpen     = signal(false);
+
+  filteredTxns = computed(() => {
+    const status = this.txnStatusFilter();
+    const sort   = this.txnSort();
+    let list = this.transactions();
+    if (status !== 'all') {
+      list = list.filter(t => t.status.toLowerCase() === status.toLowerCase());
+    }
+    return [...list].sort((a, b) => {
+      const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+      return sort === 'newest' ? diff : -diff;
+    });
+  });
+
+  // ── Lifecycle ─────────────────────────────────────────────
   ngOnInit(): void {
     const userId = this.auth.currentUser()?.userId ?? 0;
     if (!userId) { this.router.navigate(['/login']); return; }
-
     this.rentalService.loadMyRentals(userId);
     this.wishlistService.loadWishlist(userId);
-    // isLoading drives the spinner — keep it true until rentals arrive
-    // The signal-based computed() will auto-update once myRentals/myPayments load
-    setTimeout(() => this.isLoading.set(false), 300);
+    if (this.movieService.movies().length === 0) this.movieService.getAllMovies();
+    setTimeout(() => this.isLoading.set(false), 400);
   }
 
+  // ── Helpers ───────────────────────────────────────────────
   formatDate(d: string): string {
+    if (!d) return '—';
     return new Date(d).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
@@ -98,16 +91,15 @@ export class ProfileComponent implements OnInit {
     return this.rentalService.daysRemaining(expiryDate);
   }
 
-  statusClass(status: string): string {
-    const m: Record<string, string> = {
-      Active:   'status-active',
-      Expired:  'status-expired',
-      Returned: 'status-returned'
-    };
-    return m[status] ?? '';
+  progressPct(expiryDate: string, rentalDate: string): number {
+    const total   = new Date(expiryDate).getTime() - new Date(rentalDate).getTime();
+    const elapsed = Date.now() - new Date(rentalDate).getTime();
+    if (total <= 0) return 100;
+    return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
   }
 
   watchMovie(movieId: number): void {
+    this.movieService.incrementView(movieId).subscribe();
     this.router.navigate(['/watch', movieId]);
   }
 
@@ -115,31 +107,37 @@ export class ProfileComponent implements OnInit {
     this.router.navigate(['/movie', movieId]);
   }
 
+  // ── Carousel mappers ──────────────────────────────────────
   rentalsToCarousel(): CarouselItem[] {
-    return this.rentalService.myRentals().map(r => ({
-      id:        r.movieId,
-      title:     r.movieTitle,
-      subtitle:  r.status,
-      imageUrl:  null,
-      meta:      `Expires ${this.formatDate(r.expiryDate)}`,
-      badge:     r.status,
-      badgeClass: r.status === 'Active' ? 'badge-active'
-                : r.status === 'Expired' ? 'badge-expired' : 'badge-returned',
-      _movieId:  r.movieId,
-      _status:   r.status
-    }));
+    const movies = this.movieService.movies();
+    return this.rentalService.myRentals().map(r => {
+      const movie = movies.find(m => m.id === r.movieId);
+      return {
+        id:         r.movieId,
+        title:      r.movieTitle,
+        subtitle:   r.status,
+        imageUrl:   movie?.thumbnailUrl ?? null,
+        meta:       `Expires ${this.formatDate(r.expiryDate)}`,
+        badge:      r.status,
+        badgeClass: r.status === 'Active'  ? 'badge-active'
+                  : r.status === 'Expired' ? 'badge-expired'
+                  : 'badge-returned',
+        _movieId:   r.movieId,
+        _status:    r.status
+      };
+    });
   }
 
   wishlistToCarousel(): CarouselItem[] {
     return this.wishlistService.wishlist().map(w => ({
-      id:        w.movieId,
-      title:     w.movieTitle,
-      subtitle:  `₹${w.rentalPrice}/day`,
-      imageUrl:  w.thumbnailUrl,
-      meta:      `Saved ${this.formatDate(w.addedDate)}`,
-      badge:     `₹${w.rentalPrice}`,
+      id:         w.movieId,
+      title:      w.movieTitle,
+      subtitle:   `₹${w.rentalPrice}/day`,
+      imageUrl:   w.thumbnailUrl,
+      meta:       `Saved ${this.formatDate(w.addedDate)}`,
+      badge:      `₹${w.rentalPrice}`,
       badgeClass: 'badge-price',
-      _movieId:  w.movieId
+      _movieId:   w.movieId
     }));
   }
 

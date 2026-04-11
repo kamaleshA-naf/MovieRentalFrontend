@@ -9,7 +9,7 @@ import { AuthService } from '../../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { UserResponse } from '../../../models/user.model';
 
-type RoleFilter = 'all' | 'Admin' | 'Customer' | 'ContentManager';
+type RoleFilter = 'all' | 'Admin' | 'Customer';
 
 @Component({
   selector: 'app-manage-users',
@@ -33,10 +33,9 @@ export class ManageUsersComponent implements OnInit {
   selectedUser = signal<UserResponse | null>(null);
 
   readonly roleTabs: { key: RoleFilter; label: string }[] = [
-    { key: 'all',            label: 'All'              },
-    { key: 'Customer',       label: 'Customers'        },
-    { key: 'Admin',          label: 'Admins'           },
-    { key: 'ContentManager', label: 'Content Managers' }
+    { key: 'all',      label: 'All'       },
+    { key: 'Customer', label: 'Customers' },
+    { key: 'Admin',    label: 'Admins'    }
   ];
 
   // pagination + sort
@@ -99,13 +98,12 @@ export class ManageUsersComponent implements OnInit {
     ).length
   );
 
-  totalCMs = computed(() =>
-    this.users().filter(
-      (u: UserResponse) => u.role === 'ContentManager'
-    ).length
-  );
 
-  ngOnInit(): void {
+  roleClass(role: string): string {
+    if (role === 'Admin')    { return 'role-admin'; }
+    if (role === 'Customer') { return 'role-customer'; }
+    return '';
+  }  ngOnInit(): void {
     this.loadUsers();
   }
 
@@ -168,13 +166,6 @@ export class ManageUsersComponent implements OnInit {
     return new Date(d).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
-  }
-
-  roleClass(role: string): string {
-    if (role === 'Admin')          { return 'role-admin'; }
-    if (role === 'Customer')       { return 'role-customer'; }
-    if (role === 'ContentManager') { return 'role-cm'; }
-    return '';
   }
 
   initials(name: string): string {

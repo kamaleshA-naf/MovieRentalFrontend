@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../../services/auth.service';
+import { MovieService } from '../../../services/movie.service';
 import { WishlistService, WishlistItem } from '../../../services/wishlist.service';
 import { RentalService } from '../../../services/rental.service';
 import { NavbarComponent } from '../../shared/navbar/navbar';
@@ -20,6 +21,7 @@ import { environment } from '@env/environment';
 })
 export class WishlistComponent implements OnInit {
   auth            = inject(AuthService);
+  movieService    = inject(MovieService);
   wishlistService = inject(WishlistService);
   rentalService   = inject(RentalService);
   router          = inject(Router);
@@ -80,6 +82,7 @@ export class WishlistComponent implements OnInit {
 
   watchOrRent(item: WishlistItem): void {
     if (this.hasAccess(item.movieId)) {
+      this.movieService.incrementView(item.movieId).subscribe();
       this.router.navigate(['/watch', item.movieId]);
     } else {
       this.router.navigate(['/movie', item.movieId]);

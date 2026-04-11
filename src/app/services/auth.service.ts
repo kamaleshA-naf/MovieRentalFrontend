@@ -82,10 +82,7 @@ export class AuthService {
           this.isLoading.set(false);
 
           const role = (this.currentUser()?.role ?? '').toLowerCase();
-          let destination: string;
-          if      (role === 'admin')          destination = '/admin/dashboard';
-          else if (role === 'contentmanager') destination = '/cm/dashboard';
-          else                                destination = '/home';
+          const destination = role === 'admin' ? '/admin/dashboard' : '/home';
 
           this.router.navigate([destination], { replaceUrl: true }).then(() => {
             this.toastr.success(

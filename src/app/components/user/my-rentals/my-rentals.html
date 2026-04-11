@@ -64,7 +64,7 @@
         <h2 class="page-title">My Rentals</h2>
         <p class="page-sub">
           {{ activeCount() }} active ·
-          {{ rentalService.myRentals().length }} total
+          {{ filtered().length }} total
         </p>
       </div>
     </div>
@@ -76,7 +76,7 @@
         (click)="activeFilter.set('all')">
         All
         <span class="tab-count">
-          {{ rentalService.myRentals().length }}
+          {{ activeCount() + expiredCount() + returnedCount() }}
         </span>
       </button>
       <button class="tab"
@@ -101,12 +101,12 @@
       </button>
     </div>
 
-    <!-- Carousel view — all filtered rentals -->
-    @if (!rentalService.isLoading() && filtered().length > 0) {
-      <app-carousel
-        [title]="activeFilter() === 'all' ? 'All Rentals' : activeFilter() + ' Rentals'"
-        [items]="toCarouselItems(filtered())"
-        [pageSize]="20"
+    <!-- Active rentals horizontal poster carousel -->
+    @if (!rentalService.isLoading() && carouselItems().length > 0) {
+      <app-poster-carousel
+        title="Currently Watching"
+        icon='<svg width="18" height="18" viewBox="0 0 24 24" fill="#30d158"><path d="M8 5v14l11-7z"/></svg>'
+        [items]="carouselItems()"
         [loading]="rentalService.isLoading()"
         (itemClick)="onCarouselClick($event)" />
     }
@@ -237,7 +237,7 @@
                       <span class="mini-spin-green"></span>
                       Renewing…
                     } @else {
-                      ↻ Renew +3 days
+                      ↻ Renew Rental
                     }
                   </button>
                   <button class="btn-detail" (click)="goToMovie(rental)">

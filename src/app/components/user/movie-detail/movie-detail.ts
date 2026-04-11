@@ -166,7 +166,11 @@ export class MovieDetailComponent implements OnInit {
       this.addToCart();
       return;
     }
-    // incrementView is handled by the player component on load — not here
+    // Fire increment on Watch Now click — once per intentional play
+    this.movieService.incrementView(m.id).subscribe(() => {
+      // Patch local movie signal with updated viewCount
+      this.movie.update(cur => cur ? { ...cur, viewCount: (cur.viewCount ?? 0) + 1 } : cur);
+    });
     this.router.navigate(['/watch', m.id]);
   }
 

@@ -19,7 +19,6 @@ import { AdminUploadMovieComponent } from './components/admin/upload-movie/uploa
 import { ManageMoviesComponent }     from './components/admin/manage-movies/manage-movies';
 import { ManageUsersComponent }      from './components/admin/manage-users/manage-users';
 import { AdminPaymentsComponent }    from './components/admin/payments/payments';
-import { CmDashboardComponent }      from './components/content-manager/cm-dashboard/cm-dashboard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -31,9 +30,9 @@ export const routes: Routes = [
   { path: 'browse',       component: BrowseHomeComponent  },
   { path: 'browse/admin', component: BrowseAdminComponent },
 
-  { path: 'home',       component: HomeComponent,       canActivate: [authGuard], data: { roles: ['Customer', 'Admin', 'ContentManager'] } },
-  { path: 'movie/:id',  component: MovieDetailComponent, canActivate: [authGuard], data: { roles: ['Customer', 'Admin', 'ContentManager'] } },
-  { path: 'watch/:id',  component: PlayerComponent,      canActivate: [authGuard], data: { roles: ['Customer', 'Admin', 'ContentManager'] } },
+  { path: 'home',       component: HomeComponent,       canActivate: [authGuard], data: { roles: ['Customer', 'Admin'] } },
+  { path: 'movie/:id',  component: MovieDetailComponent, canActivate: [authGuard], data: { roles: ['Customer', 'Admin'] } },
+  { path: 'watch/:id',  component: PlayerComponent,      canActivate: [authGuard], data: { roles: ['Customer', 'Admin'] } },
   { path: 'my-rentals', component: MyRentalsComponent,   canActivate: [authGuard], data: { roles: ['Customer'] } },
   { path: 'wishlist',   component: WishlistComponent,    canActivate: [authGuard], data: { roles: ['Customer'] } },
   { path: 'profile',    component: ProfileComponent,     canActivate: [authGuard], data: { roles: ['Customer'] } },
@@ -44,8 +43,6 @@ export const routes: Routes = [
   { path: 'admin/movies',    component: ManageMoviesComponent,      canActivate: [authGuard], data: { roles: ['Admin'] } },
   { path: 'admin/users',     component: ManageUsersComponent,       canActivate: [authGuard], data: { roles: ['Admin'] } },
   { path: 'admin/payments',  component: AdminPaymentsComponent,     canActivate: [authGuard], data: { roles: ['Admin'] } },
-
-  { path: 'cm/dashboard', component: CmDashboardComponent, canActivate: [authGuard], data: { roles: ['ContentManager'] } },
 
   { path: '**', redirectTo: 'unauthorized' }
 ];

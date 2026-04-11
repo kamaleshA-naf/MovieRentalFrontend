@@ -9,9 +9,8 @@ export const noAuthGuard: CanActivateFn = () => {
 
   if (auth.isLoggedIn) {
     const role = (auth.currentUser()?.role ?? '').toLowerCase();
-    if      (role === 'admin')          router.navigate(['/admin/dashboard'], { replaceUrl: true });
-    else if (role === 'contentmanager') router.navigate(['/cm/dashboard'],    { replaceUrl: true });
-    else                                router.navigate(['/home'],            { replaceUrl: true });
+    const dest = role === 'admin' ? '/admin/dashboard' : '/home';
+    router.navigate([dest], { replaceUrl: true });
     return false;
   }
 

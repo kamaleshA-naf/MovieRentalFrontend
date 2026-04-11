@@ -5,8 +5,11 @@ import { CommonModule }    from '@angular/common';
 import { Router }          from '@angular/router';
 import { HttpClient }      from '@angular/common/http';
 import { NavbarComponent } from '../../shared/navbar/navbar';
-import { CarouselComponent, CarouselItem } from '../../shared/carousel/carousel';
+import { CarouselItem } from '../../shared/carousel/carousel';
+import { PosterCarouselComponent } from '../../shared/poster-carousel/poster-carousel';
 import { RentalService, RentalItem } from '../../../services/rental.service';
+import { MovieService } from '../../../services/movie.service';
+import { CartService } from '../../../services/cart.service';
 import { AuthService }     from '../../../services/auth.service';
 import { ToastrService }   from 'ngx-toastr';
 import { catchError, of }  from 'rxjs';
@@ -17,13 +20,15 @@ type FilterTab = 'all' | 'Active' | 'Expired' | 'Returned';
 @Component({
   selector:    'app-my-rentals',
   standalone:  true,
-  imports:     [CommonModule, NavbarComponent, CarouselComponent],
+  imports:     [CommonModule, NavbarComponent, PosterCarouselComponent],
   templateUrl: './my-rentals.html',
   styleUrl:    './my-rentals.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MyRentalsComponent implements OnInit {
   rentalService = inject(RentalService);
+  movieService  = inject(MovieService);
+  cartService   = inject(CartService);
   router        = inject(Router);
   private auth   = inject(AuthService);
   private toastr = inject(ToastrService);
@@ -43,30 +48,70 @@ export class MyRentalsComponent implements OnInit {
 
   readonly PLACEHOLDER = 'assets/images/placeholders/movie-placeholder.svg';
 
-  filtered = computed(() => {
-    const f   = this.activeFilter();
+  // Deduplicated: one entry per movie — latest rental wins
+  private deduped = computed(() => {
     const all = this.rentalService.myRentals();
-    if (f === 'all') return all;
-    return all.filter((r: RentalItem) => r.status === f);
+    const map = new Map<number, RentalItem>();
+    for (const r of all) {
+      const existing = map.get(r.movieId);
+      if (!existing) {
+        map.set(r.movieId, r);
+      } else {
+        const existingDate = new Date(existing.rentalDate).getTime();
+        const thisDate     = new Date(r.rentalDate).getTime();
+        if (thisDate > existingDate) map.set(r.movieId, r);
+      }
+    }
+    return Array.from(map.values());
+  });
+
+  filtered = computed(() => {
+    const f    = this.activeFilter();
+    const list = this.deduped();
+    if (f === 'all') return list;
+    return list.filter(r => r.status === f);
   });
 
   activeCount = computed(() =>
-    this.rentalService.myRentals().filter((r: RentalItem) => r.status === 'Active').length
+    this.deduped().filter(r => r.status === 'Active').length
   );
 
   expiredCount = computed(() =>
-    this.rentalService.myRentals().filter((r: RentalItem) => r.status === 'Expired').length
+    this.deduped().filter(r => r.status === 'Expired').length
   );
 
   returnedCount = computed(() =>
-    this.rentalService.myRentals().filter((r: RentalItem) => r.status === 'Returned').length
+    this.deduped().filter(r => r.status === 'Returned').length
   );
+
+  // Computed carousel items — always shows ACTIVE rentals only
+  carouselItems = computed(() => {
+    const movies = this.movieService.movies();
+    return this.deduped().filter(r => r.status === 'Active').map(r => {
+      const movie = movies.find(m => m.id === r.movieId);
+      return {
+        id:        r.movieId,
+        title:     r.movieTitle,
+        subtitle:  r.status,           // actual rental status
+        imageUrl:  movie?.thumbnailUrl ?? null,
+        meta:      `Expires ${this.formatDate(r.expiryDate)}`,
+        badge:     r.status,           // badge from rental, not movie
+        badgeClass: r.status === 'Active'   ? 'badge-active'
+                  : r.status === 'Expired'  ? 'badge-expired'
+                  : 'badge-returned',
+        _rental:   r
+      };
+    });
+  });
 
   ngOnInit(): void {
     const userId = this.auth.currentUser()?.userId ?? 0;
     if (!userId) { this.router.navigate(['/login']); return; }
     this.rentalService.loadMyRentals(userId);
-    // Wait for rentals to load before checking deleted movies
+    // Load movies if not already loaded — needed for thumbnails
+    if (this.movieService.movies().length === 0) {
+      this.movieService.getAllMovies();
+    }
     setTimeout(() => this.checkDeletedMovies(), 1200);
   }
 
@@ -91,27 +136,25 @@ export class MyRentalsComponent implements OnInit {
 
   // Renew: frontend-only optimistic update + API reload
   renewRental(rental: RentalItem): void {
-    if (this.renewingId() === rental.id) return;
+    const userId = this.auth.currentUser()?.userId;
+    if (!userId) return;
     this.renewingId.set(rental.id);
-
-    const base = new Date(Math.max(Date.now(), new Date(rental.expiryDate).getTime()));
-    base.setDate(base.getDate() + 3);
-
-    // Optimistic update
-    this.rentalService.myRentals.update(list =>
-      list.map(r => r.id === rental.id
-        ? { ...r, expiryDate: base.toISOString(), status: 'Active' }
-        : r
-      )
-    );
-
-    setTimeout(() => {
-      this.renewingId.set(null);
-      this.toastr.success(`"${rental.movieTitle}" renewed for 3 days.`, 'Renewed ✓');
-      // Reload from API to get authoritative state
-      const userId = this.auth.currentUser()?.userId ?? 0;
-      if (userId) this.rentalService.loadMyRentals(userId);
-    }, 400);
+    this.cartService.addToCart({ userId, movieId: rental.movieId, durationDays: 3 }).subscribe({
+      next: () => {
+        this.renewingId.set(null);
+        this.cartService.loadCart(userId);
+        this.router.navigate(['/cart']);
+      },
+      error: (err: any) => {
+        this.renewingId.set(null);
+        // If already in cart, just go to cart
+        if (err?.status === 409) {
+          this.router.navigate(['/cart']);
+        } else {
+          this.toastr.error(err?.error?.message ?? 'Could not add to cart.', 'Error');
+        }
+      }
+    });
   }
 
   returnMovie(rental: RentalItem): void {
@@ -211,6 +254,7 @@ export class MyRentalsComponent implements OnInit {
       this.toastr.warning('This rental has expired.', 'Expired');
       return;
     }
+    this.movieService.incrementView(rental.movieId).subscribe();
     this.router.navigate(['/watch', rental.movieId]);
   }
 
@@ -246,20 +290,6 @@ export class MyRentalsComponent implements OnInit {
   }
 
   poster(url?: string | null): string { return url ?? this.PLACEHOLDER; }
-
-  toCarouselItems(rentals: RentalItem[]): CarouselItem[] {
-    return rentals.map(r => ({
-      id:        r.movieId,
-      title:     r.movieTitle,
-      subtitle:  r.status,
-      imageUrl:  null,
-      meta:      `Expires ${this.formatDate(r.expiryDate)}`,
-      badge:     r.status,
-      badgeClass: r.status === 'Active' ? 'badge-active'
-                : r.status === 'Expired' ? 'badge-expired' : 'badge-returned',
-      _rental:   r
-    }));
-  }
 
   onCarouselClick(item: CarouselItem): void {
     const rental = item['_rental'] as RentalItem;

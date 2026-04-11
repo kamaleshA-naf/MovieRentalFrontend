@@ -37,20 +37,6 @@ export class RatingService {
     );
   }
 
-  // Explicit remove — userId comes from JWT, not URL
-  removeRating(movieId: number): Observable<MovieRatingResponse> {
-    return this.http.delete<MovieRatingResponse>(
-      `${this.API}/Movie/${movieId}/rate`
-    ).pipe(
-      tap(() => {
-        this.userRatings.update(ratings => ({ ...ratings, [movieId]: 0 }));
-      }),
-      catchError(err => {
-        console.error('Remove rating error:', err);
-        return throwError(() => err);
-      })
-    );
-  }
 
   getRatingSummary(movieId: number): Observable<MovieRatingSummary> {
     return this.http.get<MovieRatingSummary>(

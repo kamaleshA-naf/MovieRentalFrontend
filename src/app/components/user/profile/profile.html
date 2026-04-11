@@ -3,13 +3,10 @@
 
   <div class="content">
 
-    <!-- Profile hero -->
-    <div class="profile-hero-pad"></div>
+    <!-- ── Profile hero ──────────────────────────────────── -->
     <div class="profile-header">
       <div class="avatar-wrap">
-        <div class="avatar">
-          {{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}
-        </div>
+        <div class="avatar">{{ auth.currentUser()?.userName?.charAt(0)?.toUpperCase() }}</div>
       </div>
       <div class="profile-info">
         <h1 class="greeting">{{ auth.currentUser()?.userName }}</h1>
@@ -17,7 +14,7 @@
       </div>
     </div>
 
-    <!-- Stats strip -->
+    <!-- ── Stats strip ───────────────────────────────────── -->
     <div class="stats-strip">
       <div class="stat-box">
         <p class="stat-num">{{ rentalService.myRentals().length }}</p>
@@ -31,73 +28,104 @@
         <p class="stat-num">{{ wishlistService.wishlist().length }}</p>
         <p class="stat-lbl">Wishlist</p>
       </div>
+      <div class="stat-box">
+        <p class="stat-num">{{ transactions().length }}</p>
+        <p class="stat-lbl">Transactions</p>
+      </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- ── Tabs ──────────────────────────────────────────── -->
     <div class="tabs">
-      <button class="tab"
-        [class.active]="activeTab() === 'overview'"
-        (click)="activeTab.set('overview')">
-        Overview
-      </button>
-      <button class="tab"
-        [class.active]="activeTab() === 'rentals'"
+      <button class="tab" [class.active]="activeTab()==='overview'"
+        (click)="activeTab.set('overview')">Overview</button>
+      <button class="tab" [class.active]="activeTab()==='rentals'"
         (click)="activeTab.set('rentals')">
         Rentals
+        @if (rentalService.myRentals().length > 0) {
+          <span class="tab-count">{{ rentalService.myRentals().length }}</span>
+        }
       </button>
-      <button class="tab"
-        [class.active]="activeTab() === 'wishlist'"
+      <button class="tab" [class.active]="activeTab()==='wishlist'"
         (click)="activeTab.set('wishlist')">
         Wishlist
+        @if (wishlistService.wishlist().length > 0) {
+          <span class="tab-count">{{ wishlistService.wishlist().length }}</span>
+        }
       </button>
-      <button class="tab"
-        [class.active]="activeTab() === 'transactions'"
+      <button class="tab" [class.active]="activeTab()==='transactions'"
         (click)="activeTab.set('transactions')">
         Transactions
+        @if (transactions().length > 0) {
+          <span class="tab-count">{{ transactions().length }}</span>
+        }
       </button>
     </div>
 
+    <!-- ── Global loader ─────────────────────────────────── -->
     @if (isLoading()) {
-      <div class="loading-wrap">
-        <div class="loading-spinner"></div>
-      </div>
+      <div class="loading-wrap"><div class="loading-spinner"></div></div>
     }
 
     @if (!isLoading()) {
 
-      <!-- OVERVIEW -->
+      <!-- ══════════════════════════════════════════════════
+           OVERVIEW
+      ══════════════════════════════════════════════════ -->
       @if (activeTab() === 'overview') {
 
-        <!-- Active rentals -->
-        @if (activeRentals().length > 0) {
-          <div class="section-card">
-            <div class="sc-head">
-              <h3>Currently Watching</h3>
-              <span class="count-tag">{{ activeRentals().length }}</span>
-            </div>
-            @for (rental of activeRentals(); track rental.id) {
-              <div class="rental-row">
-                <div class="rental-info">
-                  <p class="rental-movie">{{ rental.movieTitle }}</p>
-                  <p class="rental-meta">Expires {{ formatDate(rental.expiryDate) }}</p>
-                  <div class="days-row">
-                    <div class="days-track">
-                      <div class="days-fill" [style.width]="(daysRemaining(rental.expiryDate) / 30 * 100) + '%'"></div>
-                    </div>
-                    <span class="days-txt">{{ daysRemaining(rental.expiryDate) }}d left</span>
-                  </div>
-                </div>
-                <button class="watch-btn" (click)="watchMovie(rental.movieId)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  Watch
-                </button>
-              </div>
+        <!-- Currently watching -->
+        <div class="section-card">
+          <div class="sc-head">
+            <h3>Currently Watching</h3>
+            @if (activeRentals().length > 0) {
+              <span class="count-tag">{{ activeRentals().length }} active</span>
             }
           </div>
-        } @else {
+          @if (activeRentals().length === 0) {
+            <div class="empty-mini">
+              No active rentals.
+              <button class="link-btn" (click)="router.navigate(['/home'])">Browse movies →</button>
+            </div>
+          }
+          @for (r of activeRentals(); track r.id) {
+            <div class="rental-row">
+              <div class="rental-info">
+                <p class="rental-movie">{{ r.movieTitle }}</p>
+                <p class="rental-meta">Expires {{ formatDate(r.expiryDate) }}</p>
+                <div class="days-row">
+                  <div class="days-track">
+                    <div class="days-fill" [style.width.%]="progressPct(r.expiryDate, r.rentalDate)"></div>
+                  </div>
+                  <span class="days-txt">{{ daysRemaining(r.expiryDate) }}d left</span>
+                </div>
+              </div>
+              <button class="watch-btn" (click)="watchMovie(r.movieId)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Watch
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Returned rentals -->
+        @if (returnedRentals().length > 0) {
           <div class="section-card">
-            <div class="sc-head"><h3>Currently Watching</h3></div>
-            <div class="empty-mini">No active rentals. Browse movies to get started.</div>
+            <div class="sc-head">
+              <h3>Returned</h3>
+              <span class="count-tag">{{ returnedRentals().length }}</span>
+            </div>
+            @for (r of returnedRentals(); track r.id) {
+              <div class="rental-row expired-row">
+                <div class="rental-info">
+                  <p class="rental-movie">{{ r.movieTitle }}</p>
+                  <p class="rental-meta">Returned · Expired {{ formatDate(r.expiryDate) }}</p>
+                </div>
+                <div class="rental-right">
+                  <span class="status-pill status-returned">Returned</span>
+                  <button class="renew-btn-sm" (click)="viewMovie(r.movieId)">Renew</button>
+                </div>
+              </div>
+            }
           </div>
         }
 
@@ -105,90 +133,210 @@
         @if (expiredRentals().length > 0) {
           <div class="section-card">
             <div class="sc-head">
-              <h3>Expired Rentals</h3>
+              <h3>Expired</h3>
               <span class="count-tag expired-tag">{{ expiredRentals().length }}</span>
             </div>
-            @for (rental of expiredRentals(); track rental.id) {
+            @for (r of expiredRentals(); track r.id) {
               <div class="rental-row expired-row">
                 <div class="rental-info">
-                  <p class="rental-movie expired-title">{{ rental.movieTitle }}</p>
-                  <p class="rental-meta">Expired {{ formatDate(rental.expiryDate) }}</p>
+                  <p class="rental-movie">{{ r.movieTitle }}</p>
+                  <p class="rental-meta">Expired {{ formatDate(r.expiryDate) }}</p>
                 </div>
                 <div class="rental-right">
                   <span class="expired-badge">Expired</span>
-                  <button class="renew-btn-sm" (click)="viewMovie(rental.movieId)">Renew</button>
+                  <button class="renew-btn-sm" (click)="viewMovie(r.movieId)">Renew</button>
                 </div>
               </div>
             }
           </div>
         }
 
+        <!-- Wishlist preview -->
         @if (wishlistService.wishlist().length > 0) {
           <div class="section-card">
             <div class="sc-head">
               <h3>My Wishlist</h3>
-              <button class="link-btn" (click)="activeTab.set('wishlist')">View all</button>
+              <button class="link-btn" (click)="activeTab.set('wishlist')">View all →</button>
             </div>
-            @for (item of wishlistService.wishlist().slice(0,3); track item.id) {
+            @for (w of wishlistService.wishlist().slice(0, 3); track w.id) {
               <div class="wishlist-row">
                 <div class="wl-info">
-                  <p class="wl-title">{{ item.movieTitle }}</p>
-                  <p class="wl-meta">₹{{ item.rentalPrice }}/day · Added {{ formatDate(item.addedDate) }}</p>
+                  <p class="wl-title">{{ w.movieTitle }}</p>
+                  <p class="wl-meta">₹{{ w.rentalPrice }}/day · Added {{ formatDate(w.addedDate) }}</p>
                 </div>
-                <button class="rent-btn" (click)="viewMovie(item.movieId)">Rent</button>
+                <button class="rent-btn" (click)="viewMovie(w.movieId)">Rent</button>
               </div>
             }
           </div>
         }
       }
 
-      <!-- RENTALS -->
+      <!-- ══════════════════════════════════════════════════
+           RENTALS
+      ══════════════════════════════════════════════════ -->
       @if (activeTab() === 'rentals') {
-        <app-carousel
-          title="All Rentals"
-          [items]="rentalsToCarousel()"
-          [pageSize]="20"
-          [loading]="isLoading()"
-          (itemClick)="onRentalCarouselClick($event)" />
+        @if (rentalService.myRentals().length === 0) {
+          <div class="section-card">
+            <div class="empty-mini">No rentals yet.</div>
+          </div>
+        } @else {
+          <app-carousel
+            title="All Rentals"
+            [items]="rentalsToCarousel()"
+            [pageSize]="20"
+            [loading]="isLoading()"
+            (itemClick)="onRentalCarouselClick($event)" />
+        }
       }
 
-      <!-- WISHLIST -->
+      <!-- ══════════════════════════════════════════════════
+           WISHLIST
+      ══════════════════════════════════════════════════ -->
       @if (activeTab() === 'wishlist') {
-        <app-carousel
-          title="My Wishlist"
-          badge="Saved"
-          badgeClass="carousel-badge-red"
-          [items]="wishlistToCarousel()"
-          [pageSize]="20"
-          [loading]="isLoading()"
-          (itemClick)="onWishlistCarouselClick($event)" />
+        @if (wishlistService.wishlist().length === 0) {
+          <div class="section-card">
+            <div class="empty-mini">Your wishlist is empty.</div>
+          </div>
+        } @else {
+          <app-carousel
+            title="My Wishlist"
+            badge="Saved"
+            badgeClass="carousel-badge-red"
+            [items]="wishlistToCarousel()"
+            [pageSize]="20"
+            [loading]="isLoading()"
+            (itemClick)="onWishlistCarouselClick($event)" />
+        }
       }
 
-      <!-- TRANSACTIONS -->
+      <!-- ══════════════════════════════════════════════════
+           TRANSACTIONS
+      ══════════════════════════════════════════════════ -->
       @if (activeTab() === 'transactions') {
         <div class="section-card">
+
           <div class="sc-head">
             <h3>Transactions</h3>
-            <span class="count-tag">{{ transactions().length }}</span>
+            @if (!txnLoading()) {
+              <span class="count-tag">{{ filteredTxns().length }}</span>
+            }
+            @if (!txnLoading() && transactions().length > 0) {
+              <div class="txn-controls">
+
+                <select class="txn-select"
+                  [ngModel]="txnStatusFilter()"
+                  (ngModelChange)="txnStatusFilter.set($event)">
+                  <option value="all">All Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Refunded">Refunded</option>
+                  <option value="Failed">Failed</option>
+                </select>
+
+                <div class="txn-sort-wrap">
+                  <button class="txn-sort-btn" (click)="txnSortOpen.update(v => !v)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                    {{ txnSort() === 'newest' ? 'Newest' : 'Oldest' }}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"
+                      [style.transform]="txnSortOpen() ? 'rotate(180deg)' : 'rotate(0deg)'">
+                      <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                  </button>
+                  @if (txnSortOpen()) {
+                    <div class="txn-sort-drop">
+                      <button class="txn-sort-opt" [class.active]="txnSort()==='newest'"
+                        (click)="txnSort.set('newest'); txnSortOpen.set(false)">
+                        Newest first
+                      </button>
+                      <button class="txn-sort-opt" [class.active]="txnSort()==='oldest'"
+                        (click)="txnSort.set('oldest'); txnSortOpen.set(false)">
+                        Oldest first
+                      </button>
+                    </div>
+                    <div class="txn-backdrop" (click)="txnSortOpen.set(false)"></div>
+                  }
+                </div>
+
+              </div>
+            }
           </div>
-          @if (transactions().length === 0) {
-            <div class="empty-mini">No transactions yet.</div>
-          }
-          @for (txn of transactions(); track txn.txnId) {
-            <div class="txn-row">
-              <div class="txn-info">
-                <p class="txn-id-txt">{{ txn.txnId }}</p>
-                <p class="txn-movie">{{ txn.movieTitle }}</p>
-                <p class="txn-date">{{ formatDate(txn.date) }} → {{ formatDate(txn.expiryDate) }}</p>
-              </div>
-              <div class="txn-right">
-                <span class="txn-amount">₹{{ txn.amount }}</span>
-                <span class="txn-status" [class.txn-refunded]="txn.status === 'Refunded'" [class.txn-completed]="txn.status === 'Completed'">
-                  {{ txn.status }}
-                </span>
-              </div>
+
+          <!-- Loading -->
+          @if (txnLoading()) {
+            <div class="txn-loading">
+              <div class="txn-spinner"></div>
+              <span>Loading transactions…</span>
             </div>
           }
+
+          <!-- Empty -->
+          @if (!txnLoading() && filteredTxns().length === 0) {
+            <div class="txn-empty">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" style="opacity:.15">
+                <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+              </svg>
+              <p>No transactions found</p>
+              @if (txnStatusFilter() !== 'all') {
+                <button class="txn-clear-filter" (click)="txnStatusFilter.set('all')">Clear filter</button>
+              } @else {
+                <p style="font-size:0.78rem;opacity:.5">Rent a movie to see payment history here.</p>
+              }
+            </div>
+          }
+
+          <!-- Rows -->
+          @if (!txnLoading()) {
+            @for (txn of filteredTxns(); track txn.txnId) {
+              <div class="txn-row">
+
+                <!-- Icon -->
+                <div class="txn-icon"
+                  [class.txn-icon-green]="txn.status === 'Completed'"
+                  [class.txn-icon-orange]="txn.status === 'Refunded'"
+                  [class.txn-icon-red]="txn.status === 'Failed'">
+                  @if (txn.status === 'Completed') {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  } @else if (txn.status === 'Refunded') {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                    </svg>
+                  } @else {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                  }
+                </div>
+
+                <!-- Info -->
+                <div class="txn-info">
+                  <p class="txn-movie">{{ txn.movieTitle }}</p>
+                  <p class="txn-id-txt">{{ txn.txnId }} · {{ txn.method }}</p>
+                  <p class="txn-date">{{ formatDate(txn.date) }}</p>
+                </div>
+
+                <!-- Amount + badge -->
+                <div class="txn-right">
+                  <span class="txn-amount"
+                    [class.txn-amount-green]="txn.status === 'Completed'"
+                    [class.txn-amount-refund]="txn.status === 'Refunded'"
+                    [class.txn-amount-red]="txn.status === 'Failed'">
+                    {{ txn.status === 'Refunded' && txn.amount > 0 ? '-' : '' }}₹{{ txn.amount }}
+                  </span>
+                  <span class="txn-status"
+                    [class.txn-completed]="txn.status === 'Completed'"
+                    [class.txn-refunded]="txn.status === 'Refunded'"
+                    [class.txn-failed]="txn.status === 'Failed'">
+                    {{ txn.status }}
+                  </span>
+                </div>
+
+              </div>
+            }
+          }
+
         </div>
       }
 

@@ -133,10 +133,6 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.resolveVideoSrc(m.videoUrl);
               }
 
-              // Increment view count — fires immediately, updates DB + local signal
-              this.movieService.incrementView(m.id);
-              // trending signal auto-refreshes inside incrementView
-
             } else if (expiredRental) {
               this.isRentalExpired.set(true);
               this.toastr.warning('Your rental has expired.', 'Expired');

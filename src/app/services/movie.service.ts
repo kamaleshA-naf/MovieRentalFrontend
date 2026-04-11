@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpContext, HttpContextToken } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MovieResponse } from '../models/movie.model';
 import { environment } from '@env/environment';
@@ -105,21 +105,6 @@ export class MovieService {
       .pipe(map(m => this.fixUrls(m)));
   }
 
-  searchMovies(keyword: string, page = 1, size = 20): Observable<any> {
-    const params = new HttpParams()
-      .set('keyword', keyword)
-      .set('pageNumber', page)
-      .set('pageSize', size);
-    return this.http
-      .get<any>(`${this.API}/Movie/search`, { params })
-      .pipe(
-        map(res => ({
-          ...res,
-          items: this.extractArray(res).map((m: MovieResponse) => this.fixUrls(m))
-        })),
-        catchError(() => of({ items: [], totalCount: 0 }))
-      );
-  }
 
   getTrendingMovies(): Observable<MovieResponse[]> {
     return this.http
@@ -136,20 +121,6 @@ export class MovieService {
       );
   }
 
-  getMoviesByGenre(genreId: number, page = 1, size = 20): Observable<any> {
-    const params = new HttpParams()
-      .set('pageNumber', page)
-      .set('pageSize', size);
-    return this.http
-      .get<any>(`${this.API}/Movie/genre/${genreId}`, { params })
-      .pipe(
-        map(res => ({
-          ...res,
-          items: this.extractArray(res).map((m: MovieResponse) => this.fixUrls(m))
-        })),
-        catchError(() => of({ items: [] }))
-      );
-  }
 
   addMovie(dto: any): Observable<MovieResponse> {
     // Backend route: POST /api/Movie/add
@@ -204,7 +175,7 @@ export class MovieService {
   }
 
   /** Increment view count — POST /api/Movie/{id}/view */
-  incrementView(id: number): void {
+  incrementView(id: number): Observable<any> {
     // Optimistic UI update immediately in local signal
     this.movies.update(list =>
       list.map(m => m.id === id ? { ...m, viewCount: (m.viewCount ?? 0) + 1 } : m)
@@ -212,16 +183,16 @@ export class MovieService {
 
     const ctx = new HttpContext().set(SKIP_ERROR_INTERCEPTOR, true);
 
-    // Try POST — if backend has the endpoint it will update DB
-    this.http.post<any>(
+    return this.http.post<any>(
       `${this.API}/Movie/${id}/view`, {},
       { context: ctx }
     ).pipe(
-      catchError(() => of(null))  // silently ignore if endpoint doesn't exist
-    ).subscribe(() => {
-      // After increment, refresh trending from DB so home page reflects real counts
-      this.refreshTrendingFromApi();
-    });
+      catchError((err) => {
+        console.error('[incrementView] failed:', err?.status, err?.message);
+        return of(null);
+      }),
+      tap(() => this.refreshTrendingFromApi())
+    );
   }
 
   /** Pull fresh viewCounts from the trending endpoint and patch into signal */
@@ -258,11 +229,6 @@ export class MovieService {
     return this.http.post<any>(`${this.API}/Movie/upload-video`, fd);
   }
 
-  getMovieStats(id: number): Observable<any> {
-    return this.http
-      .get<any>(`${this.API}/Movie/${id}/stats`)
-      .pipe(catchError(() => of(null)));
-  }
 
   loadGenres(): void {
     this.http.get<any[]>(`${this.API}/Genre`).subscribe({

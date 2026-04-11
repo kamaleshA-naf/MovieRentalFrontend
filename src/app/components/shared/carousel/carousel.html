@@ -10,7 +10,6 @@
       }
     </div>
     <div class="carousel-head-right">
-      <span class="carousel-count">{{ items.length }} items</span>
       @if (totalPages() > 1) {
         <div class="carousel-page-info">{{ currentPage() + 1 }} / {{ totalPages() }}</div>
       }
@@ -46,7 +45,7 @@
       }
 
       <!-- Real cards -->
-      @for (item of visibleItems(); track $index; let i = $index) {
+      @for (item of loopItems(); track $index; let i = $index) {
         <div class="carousel-card"
           [style.animation-delay]="(i % 10 * 40) + 'ms'"
           (click)="itemClick.emit(item)">
@@ -100,17 +99,6 @@
           </div>
 
         </div>
-      }
-
-      <!-- Append skeleton while loading more -->
-      @if (loadingMore()) {
-        @for (s of skeletons; track s) {
-          <div class="carousel-card skeleton-card">
-            <div class="card-thumb skeleton-thumb"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-          </div>
-        }
       }
 
     </div>
